@@ -3,7 +3,7 @@
 
 SMO library which has, as a result, a DLL. In the library, you can find a lot of methods to work with SQL Server database.
 
-//To take a copy only backup
+*//To take a copy only backup*
 
 public static bool BackupDatabase(ServerConnection cnn, ILog logger,  ref string errMessage, bool doVerify = true)
 
