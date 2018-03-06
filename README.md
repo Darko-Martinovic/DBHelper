@@ -4,6 +4,11 @@
 SMO library which has, as a result, a DLL. In the library, you can find a lot of methods to work with SQL Server database.
 
 *//To take a copy only backup*
+First Header | Second Header
+------------ | -------------
+Content from cell 1 | Content from cell 2
+Content in the first column | Content in the second column
+
 
 public static bool BackupDatabase(ServerConnection cnn, ILog logger,  ref string errMessage, bool doVerify = true)
 
