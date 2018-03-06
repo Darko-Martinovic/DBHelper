@@ -9,10 +9,10 @@ To take a copy only backup         | BackupDatabase(ServerConnection,ILog,ref st
 To perform database check          | CheckDb(ServerConnection, ILog , ref string )
 To put database in user access mode| PutDbInUserMode(ServerConnection, DatabaseUserAccess ,bool, ILog, ref string)
 To kill all user process for       | KillAllProcessesForOneDatabase(ServerConnection, ref string)
-      particular database          |
+particular database                |                                                                         
 To determine the log size          | DetermineLogSize(ServerConnection,ref string)
 To set database in particular      | SetRecoveryMode(ServerConnection,RecoveryModel,bool, ILog , ref string)
-       recovery mode               |    
+       recovery mode               |                                                                       
 To restore database                | RestoreDatabase(ServerConnection, ILog, ref string)
 To shrink the database log         | ShrinkLog(ServerConnection,int,ILog,ref string)
 To determine is the database online| IsTheDataBaseOnLine(ServerConnection, ILog, ref string)
