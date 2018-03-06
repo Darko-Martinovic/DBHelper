@@ -2,25 +2,18 @@
 
 SMO library which has, as a result, a DLL. In the library, you can find a lot of methods to work with SQL Server database.
 
-*//T*
+
+Method description                 | Method signature
+---------------------------------- |--------------------------------------------------------------------------------------------
+To take a copy only backup         | BackupDatabase(ServerConnection,ILog,ref string, bool)
+To perform database check          | CheckDb(ServerConnection, ILog , ref string )
+To put database in user access mode| PutDbInUserMode(ServerConnection, DatabaseUserAccess ,bool, ILog, ref string)
 
 
-Method description          | Method signature
---------------------------- |-----------------------------------
-To take a copy only backup  | BackupDatabase(ServerConnection,ILog,ref string, bool)
-Content in the first column | Content in the second column
 
 
-public static bool 
 
-// To perform database check
 
-public static bool CheckDb(ServerConnection cnn, ILog logger, ref string errMessage)
-
-// To put database in user access mode
-
-public static bool PutDbInUserMode(ServerConnection cnn, DatabaseUserAccess mode,bool killUserProcess,
-                                           ILog logger, ref string errorMessage)
 
 // To kill all user process for particular database
 
