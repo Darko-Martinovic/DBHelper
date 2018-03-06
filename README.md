@@ -12,7 +12,7 @@ To kill all user process for       | KillAllProcessesForOneDatabase(ServerConnec
 particular database                |                                                                         
 To determine the log size          | DetermineLogSize(ServerConnection,ref string)
 To set database in particular      | SetRecoveryMode(ServerConnection,RecoveryModel,bool, ILog , ref string)
-       recovery mode               |                                                                       
+recovery mode                      |                                                                       
 To restore database                | RestoreDatabase(ServerConnection, ILog, ref string)
 To shrink the database log         | ShrinkLog(ServerConnection,int,ILog,ref string)
 To determine is the database online| IsTheDataBaseOnLine(ServerConnection, ILog, ref string)
