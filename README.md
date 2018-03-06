@@ -8,36 +8,14 @@ Method description                 | Method signature
 To take a copy only backup         | BackupDatabase(ServerConnection,ILog,ref string, bool)
 To perform database check          | CheckDb(ServerConnection, ILog , ref string )
 To put database in user access mode| PutDbInUserMode(ServerConnection, DatabaseUserAccess ,bool, ILog, ref string)
-
-
-
-
-
-
-
-// To kill all user process for particular database
-
- public static bool KillAllProcessesForOneDatabase(ServerConnection cnn, ref string errorLog)
-
-// To determine the log size
-
-public static double DetermineLogSize(ServerConnection cnn, ref string errorLog)
- 
- // To set database in particular recovery mode
- 
-public static bool SetRecoveryMode(ServerConnection cnn,RecoveryModel dbMode,bool killUserProcess, ILog logger, ref string errorMessage)
-
-// To restore database
-
-public static bool RestoreDatabase(ServerConnection cnn, ILog logger, ref string errMessage)
-
-// To shrink the database log
-
-public static bool ShrinkLog(ServerConnection cnn,  int TargetLogFileSizeMB,ILog logger,  ref string errMessage)
-
-// To determine is the database online
-
-public static bool IsTheDataBaseOnLine(ServerConnection cnn, ILog logger, ref string errMessage )
+To kill all user process for       | KillAllProcessesForOneDatabase(ServerConnection, ref string)
+particular database                |
+To determine the log size          | DetermineLogSize(ServerConnection,ref string)
+To set database in particular      | SetRecoveryMode(ServerConnection,RecoveryModel,bool, ILog , ref string)
+recovery mode                      |
+To restore database                | RestoreDatabase(ServerConnection, ILog, ref string)
+To shrink the database log         | ShrinkLog(ServerConnection,int,ILog,ref string)
+To determine is the database online| IsTheDataBaseOnLine(ServerConnection, ILog, ref string)
 
 
 ## IOHeLper	
