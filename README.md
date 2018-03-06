@@ -1,4 +1,4 @@
-## DBHelper	:white_check_mark:
+## :white_check_mark: DBHelper	
 
 
 SMO library which has, as a result, a DLL. In the library, you can find a lot of methods to work with SQL Server database.
@@ -17,7 +17,7 @@ To shrink the database log                       | ShrinkLog(ServerConnection,in
 To determine is the database online              | IsTheDataBaseOnLine(ServerConnection, ILog, ref string)
 
 
-## IOHeLper	
+## :white_check_mark: IOHeLper	
 
 SQLCLR project which has, as a result, a DLL that should be published on the database server. 
 
@@ -28,10 +28,10 @@ To delete old backup files         | DeleteBackupFiles(ServerConnection, ILog, r
 To determine number and size       | DetermineNumberOfBackupFiles(ServerConnection, ILog, ref int, ref Int64,ref string)
 
  
-## Tester	
+## :white_check_mark: Tester	
 
 A console application that could be useful to make some tests.
 
-## SmoIntroduction	
+## :white_check_mark: SmoIntroduction	
 
 A console application that was our first example
