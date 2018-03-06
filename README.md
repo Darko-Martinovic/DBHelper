@@ -1,6 +1,5 @@
-## DBHelper	
+## DBHelper	:white_check_mark:
 
-@octocat :+1: This PR looks great - it's ready to merge! :shipit:
 
 SMO library which has, as a result, a DLL. In the library, you can find a lot of methods to work with SQL Server database.
 
