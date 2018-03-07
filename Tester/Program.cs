@@ -59,6 +59,7 @@ public class Program
             //-------------------------------------------------------------
             // Test Backup
             //-------------------------------------------------------------
+            
             if (DBGeneral.BackupDatabase(cnn, logger, ref errorMessage, true))
                 Console.WriteLine("The task of backup the database finsihed successfully!");
             else

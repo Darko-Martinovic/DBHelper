@@ -39,7 +39,7 @@ namespace DBHelper
         /// <param name="errMessage"></param>
         /// <param name="doVerify"></param>
         /// <returns></returns>
-        public static bool BackupDatabase(ServerConnection cnn, ILog logger,  ref string errMessage, bool doVerify = true)
+        public static bool BackupDatabase(ServerConnection cnn, ILog logger,  ref string errMessage, bool doVerify = true, bool useCompression = true)
         {
             bool retValue = false;
             bool isLogging = logger == null ? false : true;
@@ -69,7 +69,15 @@ namespace DBHelper
                 }
 
                 source = new Backup();
-                source.Action = BackupActionType.Database;
+
+                // Depends on SQL Server Edition
+                bool canIUseCompression = false;
+                if (server.EngineEdition == Edition.EnterpriseOrDeveloper || server.EngineEdition == Edition.Standard)
+                    canIUseCompression = true;
+
+                if (useCompression && canIUseCompression)
+                    source.Action = BackupActionType.Database;
+
                 source.CopyOnly = true;
                 source.Checksum = true;
 
