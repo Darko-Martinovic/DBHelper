@@ -75,9 +75,7 @@ namespace DBHelper
                 if (server.EngineEdition == Edition.EnterpriseOrDeveloper || server.EngineEdition == Edition.Standard)
                     canIUseCompression = true;
 
-                if (useCompression && canIUseCompression)
-                    source.Action = BackupActionType.Database;
-
+                source.Action = BackupActionType.Database;
                 source.CopyOnly = true;
                 source.Checksum = true;
 
@@ -85,7 +83,10 @@ namespace DBHelper
                 source.BackupSetDescription = "dbHelper BACKUP " + dataBaseName;
                 source.BackupSetName = "COPY ONLY(FULL) dbHelper BACKUP " + dataBaseName;
                 source.ContinueAfterError = false;
-                source.CompressionOption = BackupCompressionOptions.On;
+
+                if (useCompression && canIUseCompression)
+                    source.CompressionOption = BackupCompressionOptions.On;
+
                 source.SkipTapeHeader = true;
                 source.UnloadTapeAfter = false;
                 source.NoRewind = true;
