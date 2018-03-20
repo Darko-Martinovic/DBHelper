@@ -8,7 +8,6 @@ namespace SmoIntroduction
 
     class CreateTable
     {
-
         private const string C_DATABASENAME = "AdventureWorks2014";
         private const string C_NEWLINE = "\r\n";
         private const string C_TEST_TABLE = "TestTable";
@@ -18,31 +17,22 @@ namespace SmoIntroduction
         {
             ServerConnection cnn = new ServerConnection();
             cnn.Connect();
-
             Console.Write("Connected" + C_NEWLINE);
-
             //Create the server object
             Server server = new Server(cnn);
             Console.Write("Create the server object - default instance" + C_NEWLINE);
-
             //Create the database object
             Database db = server.Databases[C_DATABASENAME];
 
-
             //Create the schema if not exists
             if (db.Schemas.Contains(C_TEST_SCHEMA) == false)
-            {
                 db.Schemas[C_TEST_SCHEMA].Create();
-            }
             Console.Write("Create the schema object - if not exists" + C_NEWLINE);
 
             //Drop the table if exists
             if (db.Tables.Contains(C_TEST_TABLE, C_TEST_SCHEMA))
-            {
                 db.Tables[C_TEST_TABLE, C_TEST_SCHEMA].Drop();
-            }
             Console.Write("Droping the table if exists" + C_NEWLINE);
-
 
 
             Console.Write("Create the table object " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
@@ -89,14 +79,9 @@ namespace SmoIntroduction
                 cnn = null;
             }
             if (db != null)
-            {
                 db = null;
-            }
-
             if (server != null)
-            {
                 server = null;
-            }
             Console.Write("Press any key to exit..." + C_NEWLINE);
             Console.ReadLine();
         }
