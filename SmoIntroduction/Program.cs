@@ -244,7 +244,9 @@ namespace SmoIntroduction
                 sb.Append("\t" + cp.Description + C_NEWLINE);
                 sb.Append("\t\t" + cp.DisplayName + " : " + cp.RunValue + C_NEWLINE);
             }
-            string fileName = server.Name + ".txt";
+
+            //string fileName = server.Name.Replace(@"\", @"_") + ".txt";
+            string fileName = "ServerConfig" + DateTime.Now.ToString("yyyy_mm_dd_HH_mm_ss") + ".txt";
 
 
 

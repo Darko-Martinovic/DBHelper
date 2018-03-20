@@ -1,6 +1,8 @@
 ﻿using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace SmoIntroduction
@@ -21,7 +23,7 @@ namespace SmoIntroduction
             // Be sure you have 'AdventureWorks2014' on default instance
             // or specify server on which exists 'AdventureWorks2014' database
             // ServerConnection cnn2 = new ServerConnection("<server name>");
-            ServerConnection cnn = new ServerConnection();
+            ServerConnection cnn = new ServerConnection("DARKO\\DARKO_2014");
 
             cnn.Connect();
 
@@ -57,7 +59,30 @@ namespace SmoIntroduction
             }
             Console.Write("Setup the extended property" + C_NEWLINE);
 
-           
+
+
+            //Gettheserverconfiguration
+            Configuration pc = server.Configuration;
+            Type pcType = pc.GetType();
+            sb.Append("----------------SERVERCONFIGURATION:" + server.Name + "----------------------------" + C_NEWLINE);
+            foreach (ConfigProperty cp in pc.Properties)
+            {
+                sb.Append("\t" + cp.Description + C_NEWLINE);
+                sb.Append("\t\t" + cp.DisplayName + ":" + cp.RunValue + C_NEWLINE);
+            }
+
+            string fileName = server.Name.Replace(@"\", @"_") + ".txt";
+
+
+            if (File.Exists(fileName))
+                File.Delete(fileName);
+
+            File.WriteAllText(fileName, sb.ToString());
+            //startnotepadanddisplytheconfiguration
+            Process.Start(fileName);
+
+
+
             Console.Write("Press any key to exit..." + C_NEWLINE);
             Console.ReadLine();
         }
