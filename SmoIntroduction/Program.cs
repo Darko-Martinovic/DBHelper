@@ -3,13 +3,12 @@ using Microsoft.SqlServer.Management.Smo;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
 using System.Text;
 
-namespace DocumentYourDataBase
+namespace SmoIntroduction
 {
     class Program
     {
