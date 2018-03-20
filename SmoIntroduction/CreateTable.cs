@@ -1,6 +1,10 @@
 ﻿using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using System;
+using System.Collections.Specialized;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
 
 namespace SmoIntroduction
 {
@@ -73,6 +77,31 @@ namespace SmoIntroduction
             tbl.Create();
 
             Console.Write("Create the table on SQL Server " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
+
+
+
+            IScriptable scriptableObject = tbl;
+            if (scriptableObject != null)
+            {
+                Console.Write("Make T-SQL script to create table " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
+                StringCollection strings = scriptableObject.Script();
+
+                StringBuilder sb = new StringBuilder();
+                foreach ( string s in strings)
+                    sb.Append(s + C_NEWLINE);
+
+                string fileName = C_TEST_TABLE + DateTime.Now.ToString("yyyy_mm_dd_HH_mm_ss") + ".txt";
+
+
+
+                if (File.Exists(fileName))
+                    File.Delete(fileName);
+
+                File.WriteAllText(fileName, sb.ToString());
+                // start notepad and disply the configuration
+                Process.Start(fileName);
+
+            }
             if (cnn.IsOpen)
             {
                 cnn.Disconnect();
