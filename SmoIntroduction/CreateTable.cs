@@ -25,8 +25,6 @@ namespace SmoIntroduction
             Server server = new Server(cnn);
             Console.Write("Create the server object - default instance" + C_NEWLINE);
 
-
-
             //Create the database object
             Database db = server.Databases[C_DATABASENAME];
 
@@ -43,7 +41,11 @@ namespace SmoIntroduction
             {
                 db.Tables[C_TEST_TABLE, C_TEST_SCHEMA].Drop();
             }
+            Console.Write("Droping the table if exists" + C_NEWLINE);
 
+
+
+            Console.Write("Create the table object " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
             // Create a new table object
             Table tbl = new Table(db, C_TEST_TABLE, C_TEST_SCHEMA);
 
@@ -68,6 +70,7 @@ namespace SmoIntroduction
             tbl.Columns.Add(col);
             col.DataType.MaximumLength = 128;
             col.AddDefaultConstraint(null);
+            col.DefaultConstraint.Text = "''";
             col.Nullable = false;
 
             // Add the datetime column
@@ -75,13 +78,19 @@ namespace SmoIntroduction
             tbl.Columns.Add(col);
             col.Nullable = false;
 
+            Console.Write("Adding the table columns " + C_NEWLINE);
             // Create the table
             tbl.Create();
 
+            Console.Write("Create the table on SQL Server " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
             if (cnn.IsOpen)
             {
                 cnn.Disconnect();
                 cnn = null;
+            }
+            if (db != null)
+            {
+                db = null;
             }
 
             if (server != null)
