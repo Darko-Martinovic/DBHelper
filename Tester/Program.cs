@@ -13,6 +13,7 @@ namespace Tester
 public class Program
     {
 
+        private const string C_NEWLINE = "\r\n";
 
         static void Main(string[] args)
         {
@@ -110,7 +111,7 @@ public class Program
             //    Console.WriteLine("The task of determining how many backup files are taken  failed with following error message :" + errorMessage);
 
 
-            //Console.WriteLine("..............................................................................................");
+           Console.WriteLine("..............................................................................................");
 
 
            
@@ -123,7 +124,7 @@ public class Program
             //else
             //    Console.WriteLine("The task of deleting old backup files failed with following error message :" + errorMessage);
 
-            //Console.WriteLine("..............................................................................................");
+            Console.WriteLine("..............................................................................................");
 
 
 
@@ -136,7 +137,7 @@ public class Program
             //    Console.WriteLine("The task of determining free disk space failed with following error message :" + errorMessage);
 
 
-            //Console.WriteLine("..............................................................................................");
+            Console.WriteLine("..............................................................................................");
 
 
 
@@ -152,6 +153,9 @@ public class Program
                 Console.WriteLine("The task of shrinking log failed with following error message :" + errorMessage);
 
 
+            Console.WriteLine("..............................................................................................");
+
+
 
             //-------------------------------------------------------------
             // Test CheckDb
@@ -161,10 +165,11 @@ public class Program
             else
                 Console.WriteLine("The task of checking the database failed with following error message: " + errorMessage);
 
+            Console.WriteLine("..............................................................................................");
 
-           
 
 
+            Console.Write("Press any key to exit..." + C_NEWLINE);
             Console.ReadLine();
 
         }
