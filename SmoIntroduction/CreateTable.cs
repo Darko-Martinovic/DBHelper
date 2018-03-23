@@ -117,6 +117,7 @@ namespace SmoIntroduction
                 db = null;
             if (server != null)
                 server = null;
+
             Console.Write("Press any key to exit..." + C_NEWLINE);
             Console.ReadLine();
         }
