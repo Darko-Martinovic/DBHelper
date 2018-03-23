@@ -3,9 +3,6 @@ using Microsoft.SqlServer.Management.Smo;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Security;
-using System.Security.Permissions;
 using System.Text;
 
 namespace SmoIntroduction
@@ -271,35 +268,6 @@ namespace SmoIntroduction
             Console.ReadLine();
         }
 
-        public static class Misc
-        {
-
-            public static string DecryptSecureString(SecureString ss)
-            {
-                string str = string.Empty;
-                if (ss != null)
-                {
-                    new SecurityPermission(SecurityPermissionFlag.UnmanagedCode).Assert();
-                    IntPtr ptr = Marshal.SecureStringToBSTR(ss);
-                    str = Marshal.PtrToStringBSTR(ptr);
-                    Marshal.ZeroFreeBSTR(ptr);
-                }
-                return str;
-            }
-
-            public static SecureString EncryptString(string s)
-            {
-                SecureString str = new SecureString();
-                if (s != null)
-                {
-                    foreach (char ch in s.ToCharArray())
-                    {
-                        str.AppendChar(ch);
-                    }
-                }
-                return str;
-            }
-        }
 
     }
 }

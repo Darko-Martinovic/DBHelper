@@ -77,18 +77,24 @@ namespace SmoIntroduction
             tbl.Create();
 
             Console.Write("Create the table on SQL Server " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
+           
 
-
-
-            IScriptable scriptableObject = tbl;
-            if (scriptableObject != null)
+            if (tbl != null)
             {
                 Console.Write("Make T-SQL script to create table " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
-                StringCollection strings = scriptableObject.Script();
 
+
+                Scripter scripter = new Scripter(server);
                 StringBuilder sb = new StringBuilder();
-                foreach ( string s in strings)
-                    sb.Append(s + C_NEWLINE);
+
+                StringCollection coll = tbl.Script(MakeOptions());
+                foreach (string str in coll)
+                {
+                    sb.Append(str);
+                    sb.Append(C_NEWLINE);
+                }
+
+
 
                 string fileName = C_TEST_TABLE + DateTime.Now.ToString("yyyy_mm_dd_HH_mm_ss") + ".txt";
 
@@ -114,6 +120,74 @@ namespace SmoIntroduction
             Console.Write("Press any key to exit..." + C_NEWLINE);
             Console.ReadLine();
         }
+
+        private static ScriptingOptions MakeOptions()
+        {
+            ScriptingOptions o = new ScriptingOptions();
+            try
+            {
+                o.AllowSystemObjects = false;
+                o.AnsiFile = true;
+                o.AppendToFile = false;
+                o.AnsiPadding = true;
+
+            
+                o.ClusteredIndexes = true;
+
+                o.DriIndexes = true;
+                o.DriClustered = true;
+                o.DriNonClustered = true;
+                o.DriAllConstraints = true;
+                o.DriAllKeys = true;
+                o.Default = true;
+                o.DriAll = true;
+
+                o.ExtendedProperties = true;
+                o.EnforceScriptingOptions = true;
+
+                o.FullTextIndexes = true;
+                o.FullTextStopLists = true;
+                o.FullTextCatalogs = true;
+
+
+                o.IncludeIfNotExists = true;
+                o.Indexes = true;
+                o.IncludeHeaders = true;
+                o.IncludeDatabaseContext = true;
+
+
+
+                o.NoCommandTerminator = false;
+              
+               
+                o.Permissions = true;
+               
+                o.SchemaQualify = true;
+                o.SchemaQualifyForeignKeysReferences = true;
+               
+                
+                o.NonClusteredIndexes = true;
+                o.NoCollation = false;
+                o.NoExecuteAs = true;
+                
+              
+                o.Triggers = true;
+                o.ScriptBatchTerminator = true;
+                o.XmlIndexes = true;
+                        
+                o.WithDependencies = true;
+
+
+                   
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.ReadLine();
+            }
+            return o;
+        }
+
 
     }
 }
