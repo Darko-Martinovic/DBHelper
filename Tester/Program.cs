@@ -96,44 +96,47 @@ public class Program
             Console.WriteLine("..............................................................................................");
 
 
-            //-------------------------------------------------------------
-            // How many backup are taken
-            //-------------------------------------------------------------
-            int numberOfBackupFiles = 0;
-            Int64 totalSizeOfBackupFiles = 0;
-            if (DBGeneral.DetermineNumberOfBackupFiles(cnn, logger,ref numberOfBackupFiles,ref totalSizeOfBackupFiles, ref errorMessage))
-                Console.WriteLine("The task of determining how many backup files are taken finished successfully!");
-            else
-                Console.WriteLine("The task of determining how many backup files are taken  failed with following error message :" + errorMessage);
+            ///Frist be sure that you published SQLCLR project, then uncomment following lines
 
 
-            Console.WriteLine("..............................................................................................");
+            ////-------------------------------------------------------------
+            //// How many backup are taken
+            ////-------------------------------------------------------------
+            //int numberOfBackupFiles = 0;
+            //Int64 totalSizeOfBackupFiles = 0;
+            //if (DBGeneral.DetermineNumberOfBackupFiles(cnn, logger,ref numberOfBackupFiles,ref totalSizeOfBackupFiles, ref errorMessage))
+            //    Console.WriteLine("The task of determining how many backup files are taken finished successfully!");
+            //else
+            //    Console.WriteLine("The task of determining how many backup files are taken  failed with following error message :" + errorMessage);
+
+
+            //Console.WriteLine("..............................................................................................");
+
+
+           
+
+            ////-------------------------------------------------------------
+            //// Delete old backup files
+            ////-------------------------------------------------------------
+            //if (DBGeneral.DeleteBackupFiles(cnn, logger, ref errorMessage))
+            //    Console.WriteLine("The task of deleting old backup files finished successfully!");
+            //else
+            //    Console.WriteLine("The task of deleting old backup files failed with following error message :" + errorMessage);
+
+            //Console.WriteLine("..............................................................................................");
 
 
 
-
-            //-------------------------------------------------------------
-            // Delete old backup files
-            //-------------------------------------------------------------
-            if (DBGeneral.DeleteBackupFiles(cnn, logger, ref errorMessage))
-                Console.WriteLine("The task of deleting old backup files finished successfully!");
-            else
-                Console.WriteLine("The task of deleting old backup files failed with following error message :" + errorMessage);
-
-            Console.WriteLine("..............................................................................................");
+            ////-------------------------------------------------------------
+            //// Determine free disk space
+            ////-------------------------------------------------------------
+            //if (DBGeneral.CanIPerformABackup(cnn, logger, ref errorMessage))
+            //    Console.WriteLine("The task of determining free disk space finished successfully!");
+            //else
+            //    Console.WriteLine("The task of determining free disk space failed with following error message :" + errorMessage);
 
 
-
-            //-------------------------------------------------------------
-            // Determine free disk space
-            //-------------------------------------------------------------
-            if (DBGeneral.CanIPerformABackup(cnn, logger, ref errorMessage))
-                Console.WriteLine("The task of determining free disk space finished successfully!");
-            else
-                Console.WriteLine("The task of determining free disk space failed with following error message :" + errorMessage);
-
-
-            Console.WriteLine("..............................................................................................");
+            //Console.WriteLine("..............................................................................................");
 
 
 
