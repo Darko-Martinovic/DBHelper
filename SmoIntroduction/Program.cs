@@ -59,6 +59,10 @@ namespace SmoIntroduction
             }
             Console.Write("Setup the extended property" + C_NEWLINE);
 
+            //----------------------------------------------------------------------
+            // Setup the extended property on schema level
+            // db.Schemas is the way how we access schemas collection
+            //----------------------------------------------------------------------
             Schema sch = db.Schemas["HumanResources"];
             if (sch.ExtendedProperties[CREATEOR] == null)
             {
@@ -75,6 +79,11 @@ namespace SmoIntroduction
                 extProperty.Alter();
             }
 
+
+            //----------------------------------------------------------------------
+            // Setup the extended property on table level
+            // db.Tables is the way how we access tables collection
+            //----------------------------------------------------------------------
             Table tbl = db.Tables["Employee", "HumanResources"];
             if (tbl.ExtendedProperties[CREATEOR] == null)
             {
@@ -92,6 +101,10 @@ namespace SmoIntroduction
             }
             Console.Write("Setup the extended property on table level" + C_NEWLINE);
 
+            //----------------------------------------------------------------------
+            // Setup the extended property on column level
+            // tbl.Columns is the way how we access columns collection
+            //----------------------------------------------------------------------
             Column column = tbl.Columns["NationalIDNumber"];
             if (column.ExtendedProperties[CREATEOR] == null)
             {
@@ -109,6 +122,10 @@ namespace SmoIntroduction
             }
             Console.Write("Setup the extended property on column level" + C_NEWLINE);
 
+            //----------------------------------------------------------------------
+            // Setup the extended property on index level
+            // tbl.Indexes is the way how we access indexes collection
+            //----------------------------------------------------------------------
             Index ind = tbl.Indexes["PK_Employee_BusinessEntityID"];
             if (ind.ExtendedProperties[CREATEOR] == null)
             {
@@ -126,6 +143,11 @@ namespace SmoIntroduction
             }
             Console.Write("Setup the extended property on index level" + C_NEWLINE);
 
+
+            //----------------------------------------------------------------------
+            // Setup the extended property on storedProcedure level
+            // tbl.StoredProcedures is the way how we access StoredProcedures collection
+            //----------------------------------------------------------------------
             StoredProcedure sp = db.StoredProcedures["uspUpdateEmployeeHireInfo", "HumanResources"];
             if (sp.ExtendedProperties[CREATEOR] == null)
             {
@@ -143,6 +165,11 @@ namespace SmoIntroduction
             }
             Console.Write("Setup the extended property on stored procedure level" + C_NEWLINE);
 
+
+            //----------------------------------------------------------------------
+            // Setup the extended property on constraint level
+            // tbl.Checks is the way how we access checks collection
+            //----------------------------------------------------------------------
             Check cons = tbl.Checks["CK_Employee_BirthDate"];
             if (cons.ExtendedProperties[CREATEOR] == null)
             {
@@ -160,6 +187,10 @@ namespace SmoIntroduction
             }
             Console.Write("Setup the extended property on constraint level" + C_NEWLINE);
 
+            //----------------------------------------------------------------------
+            // Setup the extended property on view level
+            // db.Views is the way how we access views collection
+            //----------------------------------------------------------------------
             View view = db.Views["vEmployee", "HumanResources"];
             if (view.ExtendedProperties[CREATEOR] == null)
             {
@@ -177,6 +208,10 @@ namespace SmoIntroduction
             }
             Console.Write("Setup the extended property on view level" + C_NEWLINE);
 
+            //----------------------------------------------------------------------
+            // Setup the extended property on XmlSchemaCollection level
+            // db.XmlSchemaCollections is the way how we access XmlSchemaCollections collection
+            //----------------------------------------------------------------------
             XmlSchemaCollection xmlsc = db.XmlSchemaCollections["IndividualSurveySchemaCollection", "Person"];
             if (xmlsc.ExtendedProperties[CREATEOR] == null)
             {
@@ -194,6 +229,10 @@ namespace SmoIntroduction
             }
             Console.Write("Setup the extended property on XML schema collection level" + C_NEWLINE);
 
+            //----------------------------------------------------------------------
+            // Setup the extended property on ForeignKey level
+            // tbl.ForeignKeys is the way how we access ForeignKeys collection
+            //----------------------------------------------------------------------
             ForeignKey fk = tbl.ForeignKeys["FK_Employee_Person_BusinessEntityID"];
             if (fk.ExtendedProperties[CREATEOR] == null)
             {
@@ -212,6 +251,10 @@ namespace SmoIntroduction
 
             Console.Write("Setup the extended property on foreign key level" + C_NEWLINE);
 
+            //----------------------------------------------------------------------
+            // Setup the extended property on UserDefinedDataType level
+            // db.UserDefinedDataType is the way how we access UserDefinedDataTypes collection
+            //----------------------------------------------------------------------
             UserDefinedDataType types2 = db.UserDefinedDataTypes["Flag"];
             if (types2.ExtendedProperties[CREATEOR] == null)
             {
@@ -231,8 +274,9 @@ namespace SmoIntroduction
 
 
 
-
+            //----------------------------------------------------------------------
             //Get the server configuration
+            //----------------------------------------------------------------------
             Configuration pc = server.Configuration;
             Type pcType = pc.GetType();
             sb.Append("----------------SERVER CONFIGURATION : " + server.Name + "----------------------------" + C_NEWLINE);
