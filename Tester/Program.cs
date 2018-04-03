@@ -103,15 +103,15 @@ public class Program
             ////-------------------------------------------------------------
             //// How many backup are taken
             ////-------------------------------------------------------------
-            //int numberOfBackupFiles = 0;
-            //Int64 totalSizeOfBackupFiles = 0;
-            //if (DBGeneral.DetermineNumberOfBackupFiles(cnn, logger,ref numberOfBackupFiles,ref totalSizeOfBackupFiles, ref errorMessage))
-            //    Console.WriteLine("The task of determining how many backup files are taken finished successfully!");
-            //else
-            //    Console.WriteLine("The task of determining how many backup files are taken  failed with following error message :" + errorMessage);
+            int numberOfBackupFiles = 0;
+            Int64 totalSizeOfBackupFiles = 0;
+            if (DBGeneral.DetermineNumberOfBackupFiles(cnn, logger, ref numberOfBackupFiles, ref totalSizeOfBackupFiles, ref errorMessage))
+                Console.WriteLine("The task of determining how many backup files are taken finished successfully!");
+            else
+                Console.WriteLine("The task of determining how many backup files are taken  failed with following error message :" + errorMessage);
 
 
-           Console.WriteLine("..............................................................................................");
+            Console.WriteLine("..............................................................................................");
 
 
 
