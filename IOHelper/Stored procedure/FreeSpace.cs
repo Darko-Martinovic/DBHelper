@@ -21,7 +21,7 @@ public partial class StoredProcedures
         try
         {
             DiskSizeUnit foo = (DiskSizeUnit)unitOfMeasure.Value;
-            freeSpace = IOHelper.DriveHelper.FreeSpace(driveLetter.Value);
+            freeSpace = IOHelper.DriveHelper.FreeSpace(driveLetter.Value,(DiskSizeUnit) unitOfMeasure.Value);
         }
         catch ( Exception ex)
         {
