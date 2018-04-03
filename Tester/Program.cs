@@ -114,15 +114,15 @@ public class Program
            Console.WriteLine("..............................................................................................");
 
 
-           
+
 
             ////-------------------------------------------------------------
             //// Delete old backup files
             ////-------------------------------------------------------------
-            //if (DBGeneral.DeleteBackupFiles(cnn, logger, ref errorMessage))
-            //    Console.WriteLine("The task of deleting old backup files finished successfully!");
-            //else
-            //    Console.WriteLine("The task of deleting old backup files failed with following error message :" + errorMessage);
+            if (DBGeneral.DeleteBackupFiles(cnn, logger, ref errorMessage))
+                Console.WriteLine("The task of deleting old backup files finished successfully!");
+            else
+                Console.WriteLine("The task of deleting old backup files failed with following error message :" + errorMessage);
 
             Console.WriteLine("..............................................................................................");
 
@@ -131,10 +131,10 @@ public class Program
             ////-------------------------------------------------------------
             //// Determine free disk space
             ////-------------------------------------------------------------
-            //if (DBGeneral.CanIPerformABackup(cnn, logger, ref errorMessage))
-            //    Console.WriteLine("The task of determining free disk space finished successfully!");
-            //else
-            //    Console.WriteLine("The task of determining free disk space failed with following error message :" + errorMessage);
+            if (DBGeneral.CanIPerformABackup(cnn, logger, ref errorMessage))
+                Console.WriteLine("The task of determining free disk space finished successfully!");
+            else
+                Console.WriteLine("The task of determining free disk space failed with following error message :" + errorMessage);
 
 
             Console.WriteLine("..............................................................................................");
