@@ -54,14 +54,14 @@ namespace SmoIntroduction
                 }
                 if (isMemoryOptimizedFileGropuExists == false)
                 { 
-                    // If memory optimized file group does not exists - create it
+                    // If memory optimized file group does not exists - create 
                     if ( db.FileGroups.Contains(C_FILE_GROUP) == false)
                     {
                         FileGroup mo = new FileGroup(db, C_FILE_GROUP, FileGroupType.MemoryOptimizedDataFileGroup);
                         db.FileGroups.Add(mo);
                         db.FileGroups[C_FILE_GROUP].Create();
                     }
-                    // If the file for memory optimized file group does not exists - create it
+                    // If the file for memory optimized file group does not exists - create 
                     if (db.FileGroups[C_FILE_GROUP].Files.Contains(C_FILE_NAME) == false)
                     {
                         string path = C_MO_PATH;
