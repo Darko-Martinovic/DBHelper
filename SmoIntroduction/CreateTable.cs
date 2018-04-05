@@ -43,8 +43,8 @@ namespace SmoIntroduction
             // Create a new table object
             Table tbl = new Table(db, C_TEST_TABLE, C_TEST_SCHEMA);
             //
-            tbl.IsMemoryOptimized = true;
-            tbl.Durability = DurabilityType.SchemaAndData;
+            //tbl.IsMemoryOptimized = true;
+            //tbl.Durability = DurabilityType.SchemaAndData;
 
             // Add the identity column
             Column col = new Column(tbl, @"ID", DataType.Int);
