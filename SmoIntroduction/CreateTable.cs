@@ -12,10 +12,17 @@ namespace SmoIntroduction
 
     class CreateTable
     {
-        private const string C_DATABASENAME = "AdventureWorks2014";
+        private const string C_DATABASENAME = "Errors";
         private const string C_NEWLINE = "\r\n";
-        private const string C_TEST_TABLE = "TestTable2";
+        private const string C_TEST_TABLE = "TestTable";
         private const string C_TEST_SCHEMA = "HumanResources";
+
+        //Added for Memory-optimized tables
+        private const string C_FILE_GROUP = "mofg";
+        private const string C_FILE_NAME = "mofile";
+        private const string C_MO_PATH = @"C:\HKDATA";
+        private const string C_SERVER_VERSION = "13.0.4001.0"; // https://support.microsoft.com/en-us/help/3182545
+
 
         static void Main(string[] args)
         {
@@ -28,21 +35,88 @@ namespace SmoIntroduction
             //Create the database object
             Database db = server.Databases[C_DATABASENAME];
 
+            //
+            // Only for SQL Server version 2016 SP1
+            // Add MEMORY OPTIMIZED FILE GROUP AND FILE 
+            if (server.Version >= new Version(C_SERVER_VERSION))
+            {
+                Console.Write("Add support for memory optimized tables" + C_NEWLINE);
+                // First check if there is already memory optimized file group 
+                bool isMemoryOptimizedFileGropuExists = false;
+
+                foreach (FileGroup f in db.FileGroups)
+                {
+                    if (f.FileGroupType == FileGroupType.MemoryOptimizedDataFileGroup)
+                    {
+                        isMemoryOptimizedFileGropuExists = true;
+                        break;
+                    }
+                }
+                if (isMemoryOptimizedFileGropuExists == false)
+                { 
+                    // If memory optimized file group does not exists - create it
+                    if ( db.FileGroups.Contains(C_FILE_GROUP) == false)
+                    {
+                        FileGroup mo = new FileGroup(db, C_FILE_GROUP, FileGroupType.MemoryOptimizedDataFileGroup);
+                        db.FileGroups.Add(mo);
+                        db.FileGroups[C_FILE_GROUP].Create();
+                    }
+                    // If the file for memory optimized file group does not exists - create it
+                    if (db.FileGroups[C_FILE_GROUP].Files.Contains(C_FILE_NAME) == false)
+                    {
+                        string path = C_MO_PATH;
+                        int i = 0;
+                        while (true)
+                        {
+                            if (Directory.Exists(path))
+                            {
+                                path = Path.Combine(path, i.ToString());
+                                i++;
+                            }
+                            else
+                                break;
+                        }
+                        DataFile df = new DataFile(db.FileGroups[C_FILE_GROUP], C_FILE_NAME,path);
+                        db.FileGroups[C_FILE_GROUP].Files.Add(df);
+                        db.FileGroups[C_FILE_GROUP].Files[C_FILE_NAME].Create();
+
+                    }
+                }
+            }
+            //
+            // end database operation - adding memory optimized file group 
+            //
+
+
+
+            //
             //Create the schema if not exists
+            //
             if (db.Schemas.Contains(C_TEST_SCHEMA) == false)
+            {
+                Schema hr = new Schema(db, C_TEST_SCHEMA);
+                db.Schemas.Add(hr);
                 db.Schemas[C_TEST_SCHEMA].Create();
+            }
+
             Console.Write("Create the schema object - if not exists" + C_NEWLINE);
 
+            //
             //Drop the table if exists
+            //
             if (db.Tables.Contains(C_TEST_TABLE, C_TEST_SCHEMA))
                 db.Tables[C_TEST_TABLE, C_TEST_SCHEMA].Drop();
             Console.Write("Droping the table if exists" + C_NEWLINE);
 
 
             Console.Write("Create the table object " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
-            // Create a new table object
-            Table tbl = new Table(db, C_TEST_TABLE, C_TEST_SCHEMA);
+
             //
+            // Create a new table object
+            //
+            Table tbl = new Table(db, C_TEST_TABLE, C_TEST_SCHEMA);
+            tbl.IsMemoryOptimized = false;
+            // 
             //tbl.IsMemoryOptimized = true;
             //tbl.Durability = DurabilityType.SchemaAndData;
 
@@ -75,7 +149,7 @@ namespace SmoIntroduction
             }
 
             // Add the nvarchar column
-            col = new Column(tbl, @"Name", DataType.NVarChar(1024));
+            col = new Column(tbl, @"Name", DataType.VarChar(128));
             tbl.Columns.Add(col);
             col.DataType.MaximumLength = 128;
             col.AddDefaultConstraint(null);
