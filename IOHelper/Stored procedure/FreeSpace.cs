@@ -1,6 +1,4 @@
 using System;
-using System.Data;
-using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using Microsoft.SqlServer.Server;
 using static IOHelper.DriveHelper;
@@ -20,8 +18,7 @@ public partial class StoredProcedures
         freeSpace = 0;
         try
         {
-            DiskSizeUnit foo = (DiskSizeUnit)unitOfMeasure.Value;
-            freeSpace = IOHelper.DriveHelper.FreeSpace(driveLetter.Value,(DiskSizeUnit) unitOfMeasure.Value);
+            freeSpace = IOHelper.DriveHelper.FreeSpace(driveLetter.Value, (DiskSizeUnit)unitOfMeasure.Value);
         }
         catch ( Exception ex)
         {
