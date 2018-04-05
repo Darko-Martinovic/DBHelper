@@ -12,7 +12,7 @@ namespace SmoIntroduction
 
     class CreateTable
     {
-        private const string C_DATABASENAME = "Errors";
+        private const string C_DATABASENAME = "AdventureWorks2014";
         private const string C_NEWLINE = "\r\n";
         private const string C_TEST_TABLE = "TestTable";
         private const string C_TEST_SCHEMA = "HumanResources";
