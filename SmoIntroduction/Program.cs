@@ -11,6 +11,8 @@ namespace SmoIntroduction
     {
 
         private const string C_DATABASENAME = "AdventureWorks2014";
+        private const string CREATEOR = "Creator";
+        private const string VALUE = "Simple Talk";
         private const string C_NEWLINE = "\r\n";
 
         static void Main(string[] args)
@@ -31,10 +33,245 @@ namespace SmoIntroduction
             Server server = new Server(cnn);
             Console.Write("Create the server object - default instance" + C_NEWLINE);
 
-           
+            string bkpDirectory = server.BackupDirectory;
+
+
             //Create the database object
             Database db = server.Databases[C_DATABASENAME];
             Console.Write("Create the database object - AdventureWorks2014" + C_NEWLINE);
+
+
+            //Setup the extended property on database level
+            ExtendedProperty extProperty = null;
+            if (db.ExtendedProperties[CREATEOR] == null)
+            {
+                extProperty = new ExtendedProperty();
+                extProperty.Parent = db;
+                extProperty.Name = CREATEOR;
+                extProperty.Value = VALUE;
+                extProperty.Create();
+            }
+            else
+            {
+                extProperty = db.ExtendedProperties[CREATEOR];
+                extProperty.Value = VALUE;
+                extProperty.Alter();
+            }
+            Console.Write("Setup the extended property" + C_NEWLINE);
+
+            //----------------------------------------------------------------------
+            // Setup the extended property on schema level
+            // db.Schemas is the way how we access schemas collection
+            //----------------------------------------------------------------------
+            Schema sch = db.Schemas["HumanResources"];
+            if (sch.ExtendedProperties[CREATEOR] == null)
+            {
+                extProperty = new ExtendedProperty();
+                extProperty.Parent = sch;
+                extProperty.Name = CREATEOR;
+                extProperty.Value = VALUE;
+                extProperty.Create();
+            }
+            else
+            {
+                extProperty = sch.ExtendedProperties[CREATEOR];
+                extProperty.Value = VALUE;
+                extProperty.Alter();
+            }
+
+
+            //----------------------------------------------------------------------
+            // Setup the extended property on table level
+            // db.Tables is the way how we access tables collection
+            //----------------------------------------------------------------------
+            Table tbl = db.Tables["Employee", "HumanResources"];
+            if (tbl.ExtendedProperties[CREATEOR] == null)
+            {
+                extProperty = new ExtendedProperty();
+                extProperty.Parent = tbl;
+                extProperty.Name = CREATEOR;
+                extProperty.Value = VALUE;
+                extProperty.Create();
+            }
+            else
+            {
+                extProperty = tbl.ExtendedProperties[CREATEOR];
+                extProperty.Value = VALUE;
+                extProperty.Alter();
+            }
+            Console.Write("Setup the extended property on table level" + C_NEWLINE);
+
+            //----------------------------------------------------------------------
+            // Setup the extended property on column level
+            // tbl.Columns is the way how we access columns collection
+            //----------------------------------------------------------------------
+            Column column = tbl.Columns["NationalIDNumber"];
+            if (column.ExtendedProperties[CREATEOR] == null)
+            {
+                extProperty = new ExtendedProperty();
+                extProperty.Parent = column;
+                extProperty.Name = CREATEOR;
+                extProperty.Value = VALUE;
+                extProperty.Create();
+            }
+            else
+            {
+                extProperty = column.ExtendedProperties[CREATEOR];
+                extProperty.Value = VALUE;
+                extProperty.Alter();
+            }
+            Console.Write("Setup the extended property on column level" + C_NEWLINE);
+
+            //----------------------------------------------------------------------
+            // Setup the extended property on index level
+            // tbl.Indexes is the way how we access indexes collection
+            //----------------------------------------------------------------------
+            Index ind = tbl.Indexes["PK_Employee_BusinessEntityID"];
+            if (ind.ExtendedProperties[CREATEOR] == null)
+            {
+                extProperty = new ExtendedProperty();
+                extProperty.Parent = ind;
+                extProperty.Name = CREATEOR;
+                extProperty.Value = VALUE;
+                extProperty.Create();
+            }
+            else
+            {
+                extProperty = ind.ExtendedProperties[CREATEOR];
+                extProperty.Value = VALUE;
+                extProperty.Alter();
+            }
+            Console.Write("Setup the extended property on index level" + C_NEWLINE);
+
+
+            //----------------------------------------------------------------------
+            // Setup the extended property on storedProcedure level
+            // tbl.StoredProcedures is the way how we access StoredProcedures collection
+            //----------------------------------------------------------------------
+            StoredProcedure sp = db.StoredProcedures["uspUpdateEmployeeHireInfo", "HumanResources"];
+            if (sp.ExtendedProperties[CREATEOR] == null)
+            {
+                extProperty = new ExtendedProperty();
+                extProperty.Parent = sp;
+                extProperty.Name = CREATEOR;
+                extProperty.Value = VALUE;
+                extProperty.Create();
+            }
+            else
+            {
+                extProperty = sp.ExtendedProperties[CREATEOR];
+                extProperty.Value = VALUE;
+                extProperty.Alter();
+            }
+            Console.Write("Setup the extended property on stored procedure level" + C_NEWLINE);
+
+
+            //----------------------------------------------------------------------
+            // Setup the extended property on constraint level
+            // tbl.Checks is the way how we access checks collection
+            //----------------------------------------------------------------------
+            Check cons = tbl.Checks["CK_Employee_BirthDate"];
+            if (cons.ExtendedProperties[CREATEOR] == null)
+            {
+                extProperty = new ExtendedProperty();
+                extProperty.Parent = cons;
+                extProperty.Name = CREATEOR;
+                extProperty.Value = VALUE;
+                extProperty.Create();
+            }
+            else
+            {
+                extProperty = cons.ExtendedProperties[CREATEOR];
+                extProperty.Value = VALUE;
+                extProperty.Alter();
+            }
+            Console.Write("Setup the extended property on constraint level" + C_NEWLINE);
+
+            //----------------------------------------------------------------------
+            // Setup the extended property on view level
+            // db.Views is the way how we access views collection
+            //----------------------------------------------------------------------
+            View view = db.Views["vEmployee", "HumanResources"];
+            if (view.ExtendedProperties[CREATEOR] == null)
+            {
+                extProperty = new ExtendedProperty();
+                extProperty.Parent = view;
+                extProperty.Name = CREATEOR;
+                extProperty.Value = VALUE;
+                extProperty.Create();
+            }
+            else
+            {
+                extProperty = view.ExtendedProperties[CREATEOR];
+                extProperty.Value = VALUE;
+                extProperty.Alter();
+            }
+            Console.Write("Setup the extended property on view level" + C_NEWLINE);
+
+            //----------------------------------------------------------------------
+            // Setup the extended property on XmlSchemaCollection level
+            // db.XmlSchemaCollections is the way how we access XmlSchemaCollections collection
+            //----------------------------------------------------------------------
+            XmlSchemaCollection xmlsc = db.XmlSchemaCollections["IndividualSurveySchemaCollection", "Person"];
+            if (xmlsc.ExtendedProperties[CREATEOR] == null)
+            {
+                extProperty = new ExtendedProperty();
+                extProperty.Parent = xmlsc;
+                extProperty.Name = CREATEOR;
+                extProperty.Value = VALUE;
+                extProperty.Create();
+            }
+            else
+            {
+                extProperty = xmlsc.ExtendedProperties[CREATEOR];
+                extProperty.Value = VALUE;
+                extProperty.Alter();
+            }
+            Console.Write("Setup the extended property on XML schema collection level" + C_NEWLINE);
+
+            //----------------------------------------------------------------------
+            // Setup the extended property on ForeignKey level
+            // tbl.ForeignKeys is the way how we access ForeignKeys collection
+            //----------------------------------------------------------------------
+            ForeignKey fk = tbl.ForeignKeys["FK_Employee_Person_BusinessEntityID"];
+            if (fk.ExtendedProperties[CREATEOR] == null)
+            {
+                extProperty = new ExtendedProperty();
+                extProperty.Parent = fk;
+                extProperty.Name = CREATEOR;
+                extProperty.Value = VALUE;
+                extProperty.Create();
+            }
+            else
+            {
+                extProperty = fk.ExtendedProperties[CREATEOR];
+                extProperty.Value = VALUE;
+                extProperty.Alter();
+            }
+
+            Console.Write("Setup the extended property on foreign key level" + C_NEWLINE);
+
+            //----------------------------------------------------------------------
+            // Setup the extended property on UserDefinedDataType level
+            // db.UserDefinedDataType is the way how we access UserDefinedDataTypes collection
+            //----------------------------------------------------------------------
+            UserDefinedDataType types2 = db.UserDefinedDataTypes["Flag"];
+            if (types2.ExtendedProperties[CREATEOR] == null)
+            {
+                extProperty = new ExtendedProperty();
+                extProperty.Parent = types2;
+                extProperty.Name = CREATEOR;
+                extProperty.Value = VALUE;
+                extProperty.Create();
+            }
+            else
+            {
+                extProperty = types2.ExtendedProperties[CREATEOR];
+                extProperty.Value = VALUE;
+                extProperty.Alter();
+            }
+            Console.Write("Setup the extended property on user-defined type level" + C_NEWLINE);
+
 
 
             //----------------------------------------------------------------------
