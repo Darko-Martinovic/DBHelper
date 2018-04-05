@@ -14,7 +14,7 @@ namespace SmoIntroduction
     {
         private const string C_DATABASENAME = "AdventureWorks2014";
         private const string C_NEWLINE = "\r\n";
-        private const string C_TEST_TABLE = "TestTable";
+        private const string C_TEST_TABLE = "TestTable2";
         private const string C_TEST_SCHEMA = "HumanResources";
 
         static void Main(string[] args)
@@ -42,6 +42,9 @@ namespace SmoIntroduction
             Console.Write("Create the table object " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
             // Create a new table object
             Table tbl = new Table(db, C_TEST_TABLE, C_TEST_SCHEMA);
+            //
+            tbl.IsMemoryOptimized = true;
+            tbl.Durability = DurabilityType.SchemaAndData;
 
             // Add the identity column
             Column col = new Column(tbl, @"ID", DataType.Int);
@@ -50,14 +53,26 @@ namespace SmoIntroduction
             col.Identity = true;
             col.IdentitySeed = 1;
             col.IdentityIncrement = 1;
+            
 
             // Add the primary key index
-            Index idx = new Index(tbl, @"PK_" + C_TEST_TABLE);
-            tbl.Indexes.Add(idx);
-            idx.IndexedColumns.Add(new IndexedColumn(idx, col.Name));
-            idx.IsClustered = true;
-            idx.IsUnique = true;
-            idx.IndexKeyType = IndexKeyType.DriPrimaryKey;
+            if (tbl.IsMemoryOptimized == false)
+            {
+                Index idx = new Index(tbl, @"PK_" + C_TEST_TABLE);
+                tbl.Indexes.Add(idx);
+                idx.IndexedColumns.Add(new IndexedColumn(idx, col.Name));
+                idx.IsClustered = true;
+                idx.IsUnique = true;
+                idx.IndexKeyType = IndexKeyType.DriPrimaryKey;
+            }
+            else
+            {
+                Index idx = new Index(tbl, @"PK_" + C_TEST_TABLE);
+                idx.IndexType = IndexType.NonClusteredIndex;
+                idx.IndexKeyType = IndexKeyType.DriPrimaryKey;
+                tbl.Indexes.Add(idx);
+                idx.IndexedColumns.Add(new IndexedColumn(idx, col.Name));
+            }
 
             // Add the nvarchar column
             col = new Column(tbl, @"Name", DataType.NVarChar(1024));
