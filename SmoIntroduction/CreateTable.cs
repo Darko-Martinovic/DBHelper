@@ -235,11 +235,6 @@ namespace SmoIntroduction
                 o.ExtendedProperties = true;
                 o.EnforceScriptingOptions = true;
 
-                o.FullTextIndexes = true;
-                o.FullTextStopLists = true;
-                o.FullTextCatalogs = true;
-
-
                 o.IncludeIfNotExists = true;
                 o.Indexes = true;
                 o.IncludeHeaders = true;
@@ -259,11 +254,10 @@ namespace SmoIntroduction
                 o.NonClusteredIndexes = true;
                 o.NoCollation = false;
                 o.NoExecuteAs = true;
-                
               
-                o.Triggers = true;
+              
                 o.ScriptBatchTerminator = true;
-                o.XmlIndexes = true;
+
                         
                 o.WithDependencies = true;
 
