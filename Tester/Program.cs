@@ -27,7 +27,7 @@ public class Program
             ILog logger = new Logger();
 
             //-------------------------------------------------------------
-            // Is the database is ONLINE
+            // Is the database ONLINE
             //-------------------------------------------------------------
             if (DBGeneral.IsTheDataBaseOnLine(cnn, logger, ref errorMessage))
                 Console.WriteLine("The task of determining the database state finished successfully!");
