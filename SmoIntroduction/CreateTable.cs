@@ -1,5 +1,6 @@
 ﻿using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
+using Microsoft.SqlServer.Management.Sdk.Sfc;
 using System;
 using System.Collections.Specialized;
 using System.Diagnostics;
@@ -163,14 +164,31 @@ namespace SmoIntroduction
             tbl.Create();
 
             Console.Write("Create the table on SQL Server " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
-           
+
+
+
+            StringBuilder sb = new StringBuilder();
+
+
+            //Scripter scrp = new Scripter(server);
+            //scrp.Options.ScriptDrops = false;
+            //scrp.Options.WithDependencies = true;
+            //scrp.Options.Indexes = true;             // To include indexes  
+            //scrp.Options.DriAllConstraints = true;   // to include referential constraints in the script  
+
+            //StringCollection sc = scrp.Script(new Urn[] { tbl.Urn });
+            //foreach (string st in sc)
+            //{
+            //    sb.Append(st);
+            //    sb.Append(C_NEWLINE);
+            //}
+
 
             if (tbl != null)
             {
                 Console.Write("Make T-SQL script to create table " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
 
 
-                StringBuilder sb = new StringBuilder();
 
                 StringCollection coll = tbl.Script(MakeOptions());
                 foreach (string str in coll)

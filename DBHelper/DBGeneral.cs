@@ -329,12 +329,17 @@ namespace DBHelper
                     db = null;
                     return retValue;
                 }
+
+                // dbMode is the argument we passed to this routine
                 db.UserAccess = dbMode;
+                // killUserProcess is passed, kill user process
                 if (killUserProcess)
                 {
                     KillAllProcessesForOneDatabase(cnn, ref errorMessage);
-                    db.Alter(TerminationClause.RollbackTransactionsImmediately);
                 }
+                // execute Alter 
+                db.Alter(TerminationClause.RollbackTransactionsImmediately);
+                // after that Refresh is needed
                 db.Refresh();
                 server.Refresh();
                 if (isLogging)
