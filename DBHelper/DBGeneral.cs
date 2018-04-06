@@ -68,6 +68,7 @@ namespace DBHelper
                     logger.Log(@"..............................................................................................");
                 }
 
+                // instantaniate backup 
                 source = new Backup();
 
                 // Depends on SQL Server Edition
@@ -112,10 +113,10 @@ namespace DBHelper
                 };
 
 
-
+                // setup percent complete notification
                 source.PercentCompleteNotification = 5;
 
-
+                // setup backup destination
                 source.Database = dataBaseName;
                 destination = new BackupDeviceItem(backupFileName, DeviceType.File);
                 source.Devices.Add(destination);
@@ -1167,18 +1168,18 @@ namespace DBHelper
                 server = new Server(cnn);
                 db = server.Databases[cnn.DatabaseName];
                 string dataBaseName = cnn.DatabaseName;
-                                
+
                 string filter = "dbHelper_" + dataBaseName + "_*.BAK";
                 string backupDirectory = server.BackupDirectory;
                 if (server.BackupDirectory.EndsWith(@"\") == false)
                     backupDirectory += @"\";
 
-
+                // setup calling the stored procedre. Notice the procedure is the result of publishing SQLCLR project 
                 string command = @"DECLARE @errorMessage nvarchar(1000)
                                    EXEC [IOHELPER].[DeleteFiles] @path = N'{0}', @filter = N'{1}', @errorMessage = @errorMessage OUTPUT;
                                    SELECT @errorMessage AS N'@errorMessage'";
-
-                DataSet ds = db.ExecuteWithResults(String.Format(command, backupDirectory,filter));
+                // Execute stored procedure and return errormessage if any 
+                DataSet ds = db.ExecuteWithResults(String.Format(command, backupDirectory, filter));
 
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0 && ds.Tables[0].Rows[0]["@errorMessage"].ToString().Trim() != string.Empty)
                     errMessage = (string)ds.Tables[0].Rows[0]["@errorMessage"];
