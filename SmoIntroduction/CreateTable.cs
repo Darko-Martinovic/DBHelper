@@ -20,7 +20,7 @@ namespace SmoIntroduction
         //Added for Memory-optimized tables
         private const string C_FILE_GROUP = "mofg";
         private const string C_FILE_NAME = "mofile";
-        private const string C_MO_PATH = @"C:\HKDATA";
+        private const string C_MO_PATH = @"C:\HKDATAAW";
         private const string C_SERVER_VERSION = "13.0.4001.0"; // https://support.microsoft.com/en-us/help/3182545
 
 
@@ -57,6 +57,8 @@ namespace SmoIntroduction
                     // If memory optimized file group does not exists - create 
                     if ( db.FileGroups.Contains(C_FILE_GROUP) == false)
                     {
+                        // C_FILE_GROUP is constant defined above as 
+                        // private const string C_FILE_GROUP = "mofg";
                         FileGroup mo = new FileGroup(db, C_FILE_GROUP, FileGroupType.MemoryOptimizedDataFileGroup);
                         db.FileGroups.Add(mo);
                         db.FileGroups[C_FILE_GROUP].Create();
@@ -64,20 +66,15 @@ namespace SmoIntroduction
                     // If the file for memory optimized file group does not exists - create 
                     if (db.FileGroups[C_FILE_GROUP].Files.Contains(C_FILE_NAME) == false)
                     {
+                        // C_MO_PATH is the constant defined as private const string C_MO_PATH = @"C:\HKDATAAW";
+                        // C_FILE_NAME is the constant defined as private const string C_FILE_NAME = "mofile";
+                        // C_FILE_GROUP is the constant defined as private const string C_FILE_GROUP = "mofg";
                         string path = C_MO_PATH;
-                        int i = 0;
-                        while (true)
-                        {
-                            if (Directory.Exists(path))
-                            {
-                                path = Path.Combine(path, i.ToString());
-                                i++;
-                            }
-                            else
-                                break;
-                        }
+                        // Create the file ( the container ) 
                         DataFile df = new DataFile(db.FileGroups[C_FILE_GROUP], C_FILE_NAME,path);
+                        // Add the container to the memory optimized file group
                         db.FileGroups[C_FILE_GROUP].Files.Add(df);
+                        // Actually create. Now it exists in database
                         db.FileGroups[C_FILE_GROUP].Files[C_FILE_NAME].Create();
 
                     }
@@ -117,8 +114,8 @@ namespace SmoIntroduction
             Table tbl = new Table(db, C_TEST_TABLE, C_TEST_SCHEMA);
             tbl.IsMemoryOptimized = false;
             // 
-            //tbl.IsMemoryOptimized = true;
-            //tbl.Durability = DurabilityType.SchemaAndData;
+            tbl.IsMemoryOptimized = true;
+            tbl.Durability = DurabilityType.SchemaAndData;
 
             // Add the identity column
             Column col = new Column(tbl, @"ID", DataType.Int);
@@ -173,7 +170,6 @@ namespace SmoIntroduction
                 Console.Write("Make T-SQL script to create table " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
 
 
-                Scripter scripter = new Scripter(server);
                 StringBuilder sb = new StringBuilder();
 
                 StringCollection coll = tbl.Script(MakeOptions());
@@ -183,15 +179,9 @@ namespace SmoIntroduction
                     sb.Append(C_NEWLINE);
                 }
 
-
-
                 string fileName = C_TEST_TABLE + DateTime.Now.ToString("yyyy_mm_dd_HH_mm_ss") + ".txt";
-
-
-
                 if (File.Exists(fileName))
                     File.Delete(fileName);
-
                 File.WriteAllText(fileName, sb.ToString());
                 // start notepad and disply the configuration
                 Process.Start(fileName);
