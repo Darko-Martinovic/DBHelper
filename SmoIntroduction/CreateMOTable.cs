@@ -20,7 +20,7 @@ namespace SmoIntroduction
         private const string C_NEWLINE = "\r\n";
        
 
-        //Added for Memory-optimized tables
+        //Hard coded the file group name and the container name
         private const string C_FILE_GROUP = "mofg";
         private const string C_FILE_NAME = "mofile";
       
@@ -75,7 +75,7 @@ namespace SmoIntroduction
                     // If the file for memory optimized file group does not exists - create 
                     if (db.FileGroups[C_FILE_GROUP].Files.Contains(C_FILE_NAME) == false)
                     {
-                        // C_MO_PATH is the constant defined in app.config = @"C:\HKDATAAW";
+                        // C_MO_PATH is the constant defined in app.config ;
                         // C_FILE_NAME is the constant defined as private const string C_FILE_NAME = "mofile";
                         // C_FILE_GROUP is the constant defined as private const string C_FILE_GROUP = "mofg";
                         string path = ConfigurationManager.AppSettings["C_MO_PATH"];
@@ -148,19 +148,29 @@ namespace SmoIntroduction
             // Add the primary key index
            
             Index idx = new Index(tbl, @"PK_" + tableName);
-            idx.IndexType = IndexType.NonClusteredIndex;
+            //idx.IndexType = IndexType.NonClusteredIndex;
+            idx.IndexType = IndexType.NonClusteredHashIndex;
+            idx.BucketCount = 128;
+
             idx.IndexKeyType = IndexKeyType.DriPrimaryKey;
             tbl.Indexes.Add(idx);
             idx.IndexedColumns.Add(new IndexedColumn(idx, col.Name));
          
 
-            // Add the nvarchar column
+            // Add the varchar column
             col = new Column(tbl, @"Name", DataType.VarChar(128));
             tbl.Columns.Add(col);
             col.DataType.MaximumLength = 128;
             col.AddDefaultConstraint(null);
             col.DefaultConstraint.Text = "''";
             col.Nullable = false;
+
+            //Add range index 
+            idx = new Index(tbl, @"NAME_" + tableName);
+            idx.IndexType = IndexType.NonClusteredIndex;
+            idx.IndexKeyType = IndexKeyType.None;
+            tbl.Indexes.Add(idx);
+            idx.IndexedColumns.Add(new IndexedColumn(idx, col.Name));
 
             // Add the datetime column
             col = new Column(tbl, @"Date", DataType.DateTime);
