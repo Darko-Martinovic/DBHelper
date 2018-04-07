@@ -15,34 +15,40 @@ namespace SmoIntroduction
 
     public class CreateTable
     {
-        private const string C_DATABASENAME = "AdventureWorks2014";
+      
         private const string C_NEWLINE = "\r\n";
-        private const string C_TEST_TABLE = "TestTable";
-        private const string C_TEST_SCHEMA = "HumanResources";
+        
 
        
         static void Main(string[] args)
         {
-            ServerConnection cnn = new ServerConnection(new SqlConnection(ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString));
+            String connectionString = ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString;
+            SqlConnection sqlConnection = new SqlConnection(connectionString);
+            ServerConnection cnn = new ServerConnection(sqlConnection);
+
+            // Read the database name from app.config
+            string databaseName = sqlConnection.Database;
+
+
             cnn.Connect();
             Console.Write("Connected" + C_NEWLINE);
             //Create the server object
             Server server = new Server(cnn);
-            Console.Write("Create the server object - default instance" + C_NEWLINE);
+            Console.Write("Create the server object " + C_NEWLINE);
             //Create the database object
-            Database db = server.Databases[C_DATABASENAME];
-
-            
+            Database db = server.Databases[databaseName];
 
 
+            string schemaName = ConfigurationManager.AppSettings["C_TEST_SCHEMA"];
+            string tableName = ConfigurationManager.AppSettings["C_TEST_TABLE"];
             //
             //Create the schema if not exists
             //
-            if (db.Schemas.Contains(C_TEST_SCHEMA) == false)
+            if (db.Schemas.Contains(schemaName) == false)
             {
-                Schema hr = new Schema(db, C_TEST_SCHEMA);
+                Schema hr = new Schema(db, schemaName);
                 db.Schemas.Add(hr);
-                db.Schemas[C_TEST_SCHEMA].Create();
+                db.Schemas[schemaName].Create();
             }
 
             Console.Write("Create the schema object - if not exists" + C_NEWLINE);
@@ -50,17 +56,17 @@ namespace SmoIntroduction
             //
             //Drop the table if exists
             //
-            if (db.Tables.Contains(C_TEST_TABLE, C_TEST_SCHEMA))
-                db.Tables[C_TEST_TABLE, C_TEST_SCHEMA].Drop();
+            if (db.Tables.Contains(tableName, schemaName))
+                db.Tables[tableName, schemaName].Drop();
             Console.Write("Droping the table if exists" + C_NEWLINE);
 
 
-            Console.Write("Create the table object " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
+            Console.Write("Create the table object " + schemaName + "." + tableName + C_NEWLINE);
 
             //
             // Create a new table object
             //
-            Table tbl = new Table(db, C_TEST_TABLE, C_TEST_SCHEMA);
+            Table tbl = new Table(db, tableName, schemaName);
             tbl.IsMemoryOptimized = false;
             // 
             //tbl.IsMemoryOptimized = true;
@@ -76,7 +82,7 @@ namespace SmoIntroduction
             
 
           
-            Index idx = new Index(tbl, @"PK_" + C_TEST_TABLE);
+            Index idx = new Index(tbl, @"PK_" + tableName);
             tbl.Indexes.Add(idx);
             idx.IndexedColumns.Add(new IndexedColumn(idx, col.Name));
             idx.IsClustered = true;
@@ -84,7 +90,7 @@ namespace SmoIntroduction
             idx.IndexKeyType = IndexKeyType.DriPrimaryKey;
             
            
-            // Add the nvarchar column
+            // Add the varchar column
             col = new Column(tbl, @"Name", DataType.VarChar(128));
             tbl.Columns.Add(col);
             col.DataType.MaximumLength = 128;
@@ -101,7 +107,7 @@ namespace SmoIntroduction
             // Create the table
             tbl.Create();
 
-            Console.Write("Create the table on SQL Server " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
+            Console.Write("Create the table on SQL Server " + schemaName + "." + tableName + C_NEWLINE);
 
 
 
@@ -124,7 +130,7 @@ namespace SmoIntroduction
 
             if (tbl != null)
             {
-                Console.Write("Make T-SQL script to create table " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
+                Console.Write("Make T-SQL script to create table " + schemaName + "." + tableName + C_NEWLINE);
 
 
 
@@ -135,7 +141,7 @@ namespace SmoIntroduction
                     sb.Append(C_NEWLINE);
                 }
 
-                string fileName = C_TEST_TABLE + DateTime.Now.ToString("yyyy_mm_dd_HH_mm_ss") + ".txt";
+                string fileName = tableName + DateTime.Now.ToString("yyyy_mm_dd_HH_mm_ss") + ".txt";
                 if (File.Exists(fileName))
                     File.Delete(fileName);
                 File.WriteAllText(fileName, sb.ToString());
