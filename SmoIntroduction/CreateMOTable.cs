@@ -18,13 +18,12 @@ namespace SmoIntroduction
 
      
         private const string C_NEWLINE = "\r\n";
-        private const string C_TEST_TABLE = "MOTestTable";
-        private const string C_TEST_SCHEMA = "MOHumanResources";
+       
 
         //Added for Memory-optimized tables
         private const string C_FILE_GROUP = "mofg";
         private const string C_FILE_NAME = "mofile";
-        private const string C_MO_PATH = @"C:\HKDATAAW";
+      
         private const string C_SERVER_VERSION = "13.0.4001.0"; // https://support.microsoft.com/en-us/help/3182545
 
         static void Main(string[] args)
@@ -76,16 +75,25 @@ namespace SmoIntroduction
                     // If the file for memory optimized file group does not exists - create 
                     if (db.FileGroups[C_FILE_GROUP].Files.Contains(C_FILE_NAME) == false)
                     {
-                        // C_MO_PATH is the constant defined as private const string C_MO_PATH = @"C:\HKDATAAW";
+                        // C_MO_PATH is the constant defined in app.config = @"C:\HKDATAAW";
                         // C_FILE_NAME is the constant defined as private const string C_FILE_NAME = "mofile";
                         // C_FILE_GROUP is the constant defined as private const string C_FILE_GROUP = "mofg";
-                        string path = C_MO_PATH;
+                        string path = ConfigurationManager.AppSettings["C_MO_PATH"];
                         // Create the file ( the container ) 
                         DataFile df = new DataFile(db.FileGroups[C_FILE_GROUP], C_FILE_NAME, path);
                         // Add the container to the memory optimized file group
                         db.FileGroups[C_FILE_GROUP].Files.Add(df);
-                        // Actually create. Now it exists in database
-                        db.FileGroups[C_FILE_GROUP].Files[C_FILE_NAME].Create();
+                        // Actually create. Now it exists in the database
+                        try
+                        {
+                            db.FileGroups[C_FILE_GROUP].Files[C_FILE_NAME].Create();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.Write(ex.Message);
+                            Console.Write("Press any key to exit..." + C_NEWLINE);
+                            Console.ReadLine();
+                        }
 
                     }
                 }
@@ -97,11 +105,12 @@ namespace SmoIntroduction
             //
             //Create the schema if not exists
             //
-            if (db.Schemas.Contains(C_TEST_SCHEMA) == false)
+            string schemaName = ConfigurationManager.AppSettings["C_MO_TEST_SCHEMA"];
+            if (db.Schemas.Contains(schemaName) == false)
             {
-                Schema hr = new Schema(db, C_TEST_SCHEMA);
+                Schema hr = new Schema(db, schemaName);
                 db.Schemas.Add(hr);
-                db.Schemas[C_TEST_SCHEMA].Create();
+                db.Schemas[schemaName].Create();
             }
 
             Console.Write("Create the schema object - if not exists" + C_NEWLINE);
@@ -109,17 +118,18 @@ namespace SmoIntroduction
             //
             //Drop the table if exists
             //
-            if (db.Tables.Contains(C_TEST_TABLE, C_TEST_SCHEMA))
-                db.Tables[C_TEST_TABLE, C_TEST_SCHEMA].Drop();
+            string tableName = ConfigurationManager.AppSettings["C_MO_TEST_TABLE"];
+            if (db.Tables.Contains(tableName, schemaName))
+                db.Tables[tableName, schemaName].Drop();
             Console.Write("Droping the table if exists" + C_NEWLINE);
 
 
-            Console.Write("Create the table object " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
+            Console.Write("Create the table object " + schemaName + "." + tableName + C_NEWLINE);
 
             //
             // Create a new table object
             //
-            Table tbl = new Table(db, C_TEST_TABLE, C_TEST_SCHEMA);
+            Table tbl = new Table(db, tableName, schemaName);
 
             // 
             tbl.IsMemoryOptimized = true;
@@ -137,7 +147,7 @@ namespace SmoIntroduction
 
             // Add the primary key index
            
-            Index idx = new Index(tbl, @"PK_" + C_TEST_TABLE);
+            Index idx = new Index(tbl, @"PK_" + tableName);
             idx.IndexType = IndexType.NonClusteredIndex;
             idx.IndexKeyType = IndexKeyType.DriPrimaryKey;
             tbl.Indexes.Add(idx);
@@ -161,7 +171,7 @@ namespace SmoIntroduction
             // Create the table
             tbl.Create();
 
-            Console.Write("Create the table on SQL Server " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
+            Console.Write("Create the table on SQL Server " + schemaName + "." + tableName + C_NEWLINE);
 
             StringBuilder sb = new StringBuilder();
 
@@ -171,7 +181,7 @@ namespace SmoIntroduction
 
             if (tbl != null)
             {
-                Console.Write("Make T-SQL script to create table " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
+                Console.Write("Make T-SQL script to create table " + schemaName + "." + tableName + C_NEWLINE);
 
 
 
@@ -182,7 +192,7 @@ namespace SmoIntroduction
                     sb.Append(C_NEWLINE);
                 }
 
-                string fileName = C_TEST_TABLE + DateTime.Now.ToString("yyyy_mm_dd_HH_mm_ss") + ".txt";
+                string fileName = tableName + DateTime.Now.ToString("yyyy_mm_dd_HH_mm_ss") + ".txt";
                 if (File.Exists(fileName))
                     File.Delete(fileName);
                 File.WriteAllText(fileName, sb.ToString());
