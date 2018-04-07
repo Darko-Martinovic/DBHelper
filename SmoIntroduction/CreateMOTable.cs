@@ -11,29 +11,85 @@ using System.Data.SqlClient;
 
 namespace SmoIntroduction
 {
+   
 
-
-    public class CreateTable
+    public class CreateMOTable
     {
+
         private const string C_DATABASENAME = "AdventureWorks2014";
         private const string C_NEWLINE = "\r\n";
-        private const string C_TEST_TABLE = "TestTable";
-        private const string C_TEST_SCHEMA = "HumanResources";
+        private const string C_TEST_TABLE = "MOTestTable";
+        private const string C_TEST_SCHEMA = "MOHumanResources";
 
-       
+        //Added for Memory-optimized tables
+        private const string C_FILE_GROUP = "mofg";
+        private const string C_FILE_NAME = "mofile";
+        private const string C_MO_PATH = @"C:\HKDATAAW";
+        private const string C_SERVER_VERSION = "13.0.4001.0"; // https://support.microsoft.com/en-us/help/3182545
+
         static void Main(string[] args)
         {
+
+           
             ServerConnection cnn = new ServerConnection(new SqlConnection(ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString));
+
+                   
             cnn.Connect();
             Console.Write("Connected" + C_NEWLINE);
             //Create the server object
             Server server = new Server(cnn);
-            Console.Write("Create the server object - default instance" + C_NEWLINE);
+            Console.Write("Create the server object" + C_NEWLINE);
             //Create the database object
             Database db = server.Databases[C_DATABASENAME];
 
-            
+            //
+            // Only for SQL Server version 2016 SP1
+            // Add MEMORY OPTIMIZED FILE GROUP AND FILE 
+            if (server.Version >= new Version(C_SERVER_VERSION))
+            {
+                Console.Write("Add support for memory optimized tables" + C_NEWLINE);
+                // First check if there is already memory optimized file group 
+                bool isMemoryOptimizedFileGropuExists = false;
 
+                foreach (FileGroup f in db.FileGroups)
+                {
+                    if (f.FileGroupType == FileGroupType.MemoryOptimizedDataFileGroup)
+                    {
+                        isMemoryOptimizedFileGropuExists = true;
+                        break;
+                    }
+                }
+                if (isMemoryOptimizedFileGropuExists == false)
+                {
+                    // If memory optimized file group does not exists - create 
+                    if (db.FileGroups.Contains(C_FILE_GROUP) == false)
+                    {
+                        // C_FILE_GROUP is constant defined above as 
+                        // private const string C_FILE_GROUP = "mofg";
+                        FileGroup mo = new FileGroup(db, C_FILE_GROUP, FileGroupType.MemoryOptimizedDataFileGroup);
+                        db.FileGroups.Add(mo);
+                        db.FileGroups[C_FILE_GROUP].Create();
+                    }
+                    // If the file for memory optimized file group does not exists - create 
+                    if (db.FileGroups[C_FILE_GROUP].Files.Contains(C_FILE_NAME) == false)
+                    {
+                        // C_MO_PATH is the constant defined as private const string C_MO_PATH = @"C:\HKDATAAW";
+                        // C_FILE_NAME is the constant defined as private const string C_FILE_NAME = "mofile";
+                        // C_FILE_GROUP is the constant defined as private const string C_FILE_GROUP = "mofg";
+                        string path = C_MO_PATH;
+                        // Create the file ( the container ) 
+                        DataFile df = new DataFile(db.FileGroups[C_FILE_GROUP], C_FILE_NAME, path);
+                        // Add the container to the memory optimized file group
+                        db.FileGroups[C_FILE_GROUP].Files.Add(df);
+                        // Actually create. Now it exists in database
+                        db.FileGroups[C_FILE_GROUP].Files[C_FILE_NAME].Create();
+
+                    }
+                }
+            }
+            //
+            // end database operation - adding memory optimized file group 
+            //
 
             //
             //Create the schema if not exists
@@ -61,10 +117,11 @@ namespace SmoIntroduction
             // Create a new table object
             //
             Table tbl = new Table(db, C_TEST_TABLE, C_TEST_SCHEMA);
-            tbl.IsMemoryOptimized = false;
+
             // 
-            //tbl.IsMemoryOptimized = true;
-            //tbl.Durability = DurabilityType.SchemaAndData;
+            tbl.IsMemoryOptimized = true;
+            tbl.Durability = DurabilityType.SchemaAndData;
+           
 
             // Add the identity column
             Column col = new Column(tbl, @"ID", DataType.Int);
@@ -73,17 +130,17 @@ namespace SmoIntroduction
             col.Identity = true;
             col.IdentitySeed = 1;
             col.IdentityIncrement = 1;
-            
 
-          
+
+            // Add the primary key index
+           
             Index idx = new Index(tbl, @"PK_" + C_TEST_TABLE);
+            idx.IndexType = IndexType.NonClusteredIndex;
+            idx.IndexKeyType = IndexKeyType.DriPrimaryKey;
             tbl.Indexes.Add(idx);
             idx.IndexedColumns.Add(new IndexedColumn(idx, col.Name));
-            idx.IsClustered = true;
-            idx.IsUnique = true;
-            idx.IndexKeyType = IndexKeyType.DriPrimaryKey;
-            
-           
+         
+
             // Add the nvarchar column
             col = new Column(tbl, @"Name", DataType.VarChar(128));
             tbl.Columns.Add(col);
@@ -103,23 +160,10 @@ namespace SmoIntroduction
 
             Console.Write("Create the table on SQL Server " + C_TEST_SCHEMA + "." + C_TEST_TABLE + C_NEWLINE);
 
-
-
             StringBuilder sb = new StringBuilder();
 
 
-            //Scripter scrp = new Scripter(server);
-            //scrp.Options.ScriptDrops = false;
-            //scrp.Options.WithDependencies = true;
-            //scrp.Options.Indexes = true;             // To include indexes  
-            //scrp.Options.DriAllConstraints = true;   // to include referential constraints in the script  
-
-            //StringCollection sc = scrp.Script(new Urn[] { tbl.Urn });
-            //foreach (string st in sc)
-            //{
-            //    sb.Append(st);
-            //    sb.Append(C_NEWLINE);
-            //}
+           
 
 
             if (tbl != null)
@@ -128,7 +172,7 @@ namespace SmoIntroduction
 
 
 
-                StringCollection coll = tbl.Script(MakeOptions());
+                StringCollection coll = tbl.Script(CreateTable.MakeOptions());
                 foreach (string str in coll)
                 {
                     sb.Append(str);
@@ -155,69 +199,10 @@ namespace SmoIntroduction
 
             Console.Write("Press any key to exit..." + C_NEWLINE);
             Console.ReadLine();
+
         }
 
-        public static ScriptingOptions MakeOptions()
-        {
-            ScriptingOptions o = new ScriptingOptions();
-            try
-            {
-                o.AllowSystemObjects = false;
-                o.AnsiFile = true;
-                o.AppendToFile = false;
-                o.AnsiPadding = true;
-
-            
-                o.ClusteredIndexes = true;
-
-                o.DriIndexes = true;
-                o.DriClustered = true;
-                o.DriNonClustered = true;
-                o.DriAllConstraints = true;
-                o.DriAllKeys = true;
-                o.Default = true;
-                o.DriAll = true;
-
-                o.ExtendedProperties = true;
-                o.EnforceScriptingOptions = true;
-
-                o.IncludeIfNotExists = true;
-                o.Indexes = true;
-                o.IncludeHeaders = true;
-                o.IncludeDatabaseContext = true;
-
-
-
-                o.NoCommandTerminator = false;
-              
-               
-                o.Permissions = true;
-               
-                o.SchemaQualify = true;
-                o.SchemaQualifyForeignKeysReferences = true;
-               
-                
-                o.NonClusteredIndexes = true;
-                o.NoCollation = false;
-                o.NoExecuteAs = true;
-              
-              
-                o.ScriptBatchTerminator = true;
-
-                        
-                o.WithDependencies = true;
-
-
-                   
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.ReadLine();
-            }
-            return o;
-        }
 
 
     }
-}
+    }
