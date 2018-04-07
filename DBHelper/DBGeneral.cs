@@ -39,7 +39,11 @@ namespace DBHelper
         /// <param name="errMessage"></param>
         /// <param name="doVerify"></param>
         /// <returns></returns>
-        public static bool BackupDatabase(ServerConnection cnn, ILog logger,  ref string errMessage, bool doVerify = true, bool useCompression = true)
+        public static bool BackupDatabase(ServerConnection cnn, 
+                                            ILog logger,  
+                                            ref string errMessage, 
+                                            bool doVerify = true, 
+                                            bool useCompression = true)
         {
             bool retValue = false;
             bool isLogging = logger == null ? false : true;
