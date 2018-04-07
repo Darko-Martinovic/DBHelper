@@ -16,7 +16,7 @@ namespace SmoIntroduction
     public class CreateMOTable
     {
 
-        private const string C_DATABASENAME = "AdventureWorks2014";
+     
         private const string C_NEWLINE = "\r\n";
         private const string C_TEST_TABLE = "MOTestTable";
         private const string C_TEST_SCHEMA = "MOHumanResources";
@@ -30,8 +30,11 @@ namespace SmoIntroduction
         static void Main(string[] args)
         {
 
-           
-            ServerConnection cnn = new ServerConnection(new SqlConnection(ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString));
+            String connectionString = ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString;
+            SqlConnection sqlConnection = new SqlConnection(connectionString);
+            ServerConnection cnn = new ServerConnection(sqlConnection);
+            // Read the database name from app.config
+            string databaseName = sqlConnection.Database;
 
                    
             cnn.Connect();
@@ -40,7 +43,7 @@ namespace SmoIntroduction
             Server server = new Server(cnn);
             Console.Write("Create the server object" + C_NEWLINE);
             //Create the database object
-            Database db = server.Databases[C_DATABASENAME];
+            Database db = server.Databases[databaseName];
 
             //
             // Only for SQL Server version 2016 SP1
