@@ -93,6 +93,7 @@ namespace SmoIntroduction
                             Console.Write(ex.Message);
                             Console.Write("Press any key to exit..." + C_NEWLINE);
                             Console.ReadLine();
+                            return;
                         }
 
                     }
