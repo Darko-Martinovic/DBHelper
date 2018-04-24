@@ -4,6 +4,8 @@ using Microsoft.SqlServer.Management.Smo;
 using System.Diagnostics;
 using System.Collections.Specialized;
 using System.Data;
+using Converter.Extension;
+using System.Linq;
 
 /// <summary>
 /// T-SQL EQUIVALENT ZA SVAKI DIO 
@@ -197,12 +199,16 @@ namespace DBHelper
                     Debugger.Break();
                 }
                 retValue = false;
-                errMessage = ex.Message;
+
+                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
+                           .Select(ex1 => ex1.Message);
+
+                errMessage = String.Join(Environment.NewLine + "\t", error1);
+
+
                 if (isLogging)
                 {
                     logger.Log("Error during backup : " + errMessage );
-                    if (ex.InnerException != null)
-                        logger.Log("Error during backup : " + ex.InnerException.Message );
                     logger.Log(@".............................................................................................." );
                 }
 
@@ -265,12 +271,14 @@ namespace DBHelper
                     Debugger.Break();
                 }
                 retValue = false;
-                errMessage = ex.Message;
+                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
+                           .Select(ex1 => ex1.Message);
+
+                errMessage = String.Join(Environment.NewLine + "\t", error1);
+
                 if (isLogging)
                 {
                     logger.Log("Error during checking database : " + errMessage );
-                    if (ex.InnerException != null)
-                        logger.Log("Error during checking database : " + ex.InnerException.Message );
                     logger.Log(@".............................................................................................." );
                 }
 
@@ -360,9 +368,11 @@ namespace DBHelper
                 {
                     Debugger.Break();
                 }
-                errorMessage = ex.Message;
-                if ( ex.InnerException != null)
-                    errorMessage +=  "\t" +  ex.InnerException.Message;
+
+                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
+                             .Select(ex1 => ex1.Message);
+
+                errorMessage = String.Join(Environment.NewLine + "\t", error1);
 
                 retValue = false;
                 if (isLogging)
@@ -407,9 +417,12 @@ namespace DBHelper
             catch (Exception ex)
             {
                 retValue = false;
-                errorLog = ex.Message; 
-                if (ex.InnerException != null )
-                    errorLog += "\r\n" +  ex.InnerException.Message;
+                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message);
+
+                errorLog = String.Join(Environment.NewLine + "\t", error1);
+
+
             }
             finally
             {
@@ -455,10 +468,11 @@ namespace DBHelper
                 {
                     Debugger.Break();
                 }
-                errorLog = ex.Message;
-                if (ex.InnerException != null)
-                    errorLog += "\r\n" + ex.InnerException.Message;
-               
+                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message);
+
+                errorLog = String.Join(Environment.NewLine + "\t", error1);
+
             }
             finally
             {
@@ -546,10 +560,11 @@ namespace DBHelper
             {
                 if (Debugger.IsAttached)
                     Debugger.Break();
-                errorMessage = ex.Message;
-                if (ex.InnerException != null)
-                    errorMessage += "\r\n" + ex.InnerException.Message;
-                
+
+                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message);
+                errorMessage = String.Join(Environment.NewLine + "\t", error1);
+
                 retValue = false;
                 if (isLogging)
                 {
@@ -703,15 +718,14 @@ namespace DBHelper
                     Debugger.Break();
                 }
                 retValue = false;
-                errMessage = ex.Message;
-                if (ex.InnerException != null)
-                    errMessage += "\r\n" + ex.InnerException.Message;
+                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message);
+
+                errMessage = String.Join(Environment.NewLine + "\t", error1);
 
                 if (isLogging)
                 {
                     logger.Log("Error during restoring : " + errMessage );
-                    if (ex.InnerException != null)
-                        logger.Log("Error during restore operation : " + ex.InnerException.Message );
                     logger.Log(".............................................................................................." );
                 }
 
@@ -796,13 +810,14 @@ namespace DBHelper
                     Debugger.Break();
                 }
                 retValue = false;
-                errMessage = ex.Message;
-                if (ex.InnerException != null )
-                    errMessage += "\r\n" +  ex.InnerException.Message;
+                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message);
+
+                errMessage = String.Join(Environment.NewLine + "\t", error1);
 
                 if (isLogging)
                 {
-                    logger.Log("There is an error during shrinking : " + ex.Message );
+                    logger.Log("There is an error during shrinking : " + errMessage );
                     logger.Log(".............................................................................................." );
                 }
 
@@ -891,9 +906,10 @@ namespace DBHelper
                 {
                     Debugger.Break();
                 }
-                errorMessage = ex.Message;
-                if (ex.InnerException != null)
-                    errorMessage += "\r\n" + ex.InnerException.Message;
+                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message);
+
+                errorMessage = String.Join(Environment.NewLine + "\t", error1);
 
                 retValue = false;
                 if (isLogging)
@@ -973,13 +989,17 @@ namespace DBHelper
                     Debugger.Break();
                 }
 
-                errMessage = ex.Message;
+                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
+                           .Select(ex1 => ex1.Message);
+
+                errMessage = String.Join(Environment.NewLine + "\t", error1);
+
                 if (retValue == false)
                 {
                     if (isLogging)
                     {
                         logger.Log("The database \"" + dataBaseName + "\" does not exists!");
-                        logger.Log("Exception : " + ex.Message);
+                        logger.Log("Exception : " + errMessage);
                         logger.Log("..............................................................................................");
                     }
                 }
@@ -1041,7 +1061,11 @@ namespace DBHelper
             }
             catch (Exception ex)
             {
-                string test = ex.Message;
+                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
+                            .Select(ex1 => ex1.Message);
+
+                errorLog = String.Join(Environment.NewLine + "\t", error1);
+
             }
             finally
             {
@@ -1122,9 +1146,10 @@ namespace DBHelper
             catch (Exception ex)
             {
                 retValue = false;
-                errMessage = ex.Message;
-                if (ex.InnerException != null)
-                    errMessage += "\r\n" + ex.InnerException;
+                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message);
+
+                errMessage = String.Join(Environment.NewLine + "\t", error1);
                 if (isLogging)
                 {
                     logger.Log("..............................................................................................");
@@ -1218,9 +1243,10 @@ namespace DBHelper
             catch (Exception ex)
             {
                 retValue = false;
-                errMessage = ex.Message;
-                if (ex.InnerException != null)
-                    errMessage += "\r\n" + ex.InnerException;
+                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message);
+
+                errMessage = String.Join(Environment.NewLine + "\t", error1);
                 if (isLogging)
                 {
                     logger.Log("..............................................................................................");
@@ -1312,9 +1338,10 @@ namespace DBHelper
             catch ( Exception ex)
             {
                 backupExists = false;
-                errorMessage = ex.Message;
-                if (ex.InnerException != null)
-                    errorMessage += "\r\n" + ex.InnerException;
+                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message);
+
+                errorMessage = String.Join(Environment.NewLine + "\t", error1);
                 if (isLogging)
                 {
                     logger.Log("..............................................................................................");
