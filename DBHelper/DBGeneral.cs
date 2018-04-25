@@ -200,10 +200,8 @@ namespace DBHelper
                 }
                 retValue = false;
 
-                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
-                           .Select(ex1 => ex1.Message);
-
-                errMessage = String.Join(Environment.NewLine + "\t", error1);
+                errMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                           .Select(ex1 => ex1.Message));
 
 
                 if (isLogging)
@@ -271,10 +269,10 @@ namespace DBHelper
                     Debugger.Break();
                 }
                 retValue = false;
-                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
-                           .Select(ex1 => ex1.Message);
+                
 
-                errMessage = String.Join(Environment.NewLine + "\t", error1);
+                errMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                           .Select(ex1 => ex1.Message));
 
                 if (isLogging)
                 {
@@ -369,10 +367,10 @@ namespace DBHelper
                     Debugger.Break();
                 }
 
-                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
-                             .Select(ex1 => ex1.Message);
+                
 
-                errorMessage = String.Join(Environment.NewLine + "\t", error1);
+                errorMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                             .Select(ex1 => ex1.Message));
 
                 retValue = false;
                 if (isLogging)
@@ -417,10 +415,10 @@ namespace DBHelper
             catch (Exception ex)
             {
                 retValue = false;
-                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
-                      .Select(ex1 => ex1.Message);
+                
 
-                errorLog = String.Join(Environment.NewLine + "\t", error1);
+                errorLog = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message));
 
 
             }
@@ -468,10 +466,10 @@ namespace DBHelper
                 {
                     Debugger.Break();
                 }
-                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
-                      .Select(ex1 => ex1.Message);
+                
 
-                errorLog = String.Join(Environment.NewLine + "\t", error1);
+                errorLog = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message));
 
             }
             finally
@@ -561,9 +559,9 @@ namespace DBHelper
                 if (Debugger.IsAttached)
                     Debugger.Break();
 
-                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
-                      .Select(ex1 => ex1.Message);
-                errorMessage = String.Join(Environment.NewLine + "\t", error1);
+                
+                errorMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message));
 
                 retValue = false;
                 if (isLogging)
@@ -718,10 +716,10 @@ namespace DBHelper
                     Debugger.Break();
                 }
                 retValue = false;
-                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
-                      .Select(ex1 => ex1.Message);
+                
 
-                errMessage = String.Join(Environment.NewLine + "\t", error1);
+                errMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message));
 
                 if (isLogging)
                 {
@@ -810,10 +808,10 @@ namespace DBHelper
                     Debugger.Break();
                 }
                 retValue = false;
-                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
-                      .Select(ex1 => ex1.Message);
+                
 
-                errMessage = String.Join(Environment.NewLine + "\t", error1);
+                errMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message));
 
                 if (isLogging)
                 {
@@ -906,10 +904,10 @@ namespace DBHelper
                 {
                     Debugger.Break();
                 }
-                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
-                      .Select(ex1 => ex1.Message);
+                
 
-                errorMessage = String.Join(Environment.NewLine + "\t", error1);
+                errorMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message));
 
                 retValue = false;
                 if (isLogging)
@@ -989,10 +987,10 @@ namespace DBHelper
                     Debugger.Break();
                 }
 
-                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
-                           .Select(ex1 => ex1.Message);
+                
 
-                errMessage = String.Join(Environment.NewLine + "\t", error1);
+                errMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                           .Select(ex1 => ex1.Message));
 
                 if (retValue == false)
                 {
@@ -1061,10 +1059,10 @@ namespace DBHelper
             }
             catch (Exception ex)
             {
-                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
-                            .Select(ex1 => ex1.Message);
+                
 
-                errorLog = String.Join(Environment.NewLine + "\t", error1);
+                errorLog = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                            .Select(ex1 => ex1.Message));
 
             }
             finally
@@ -1146,10 +1144,10 @@ namespace DBHelper
             catch (Exception ex)
             {
                 retValue = false;
-                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
-                      .Select(ex1 => ex1.Message);
+                
 
-                errMessage = String.Join(Environment.NewLine + "\t", error1);
+                errMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message));
                 if (isLogging)
                 {
                     logger.Log("..............................................................................................");
@@ -1243,10 +1241,10 @@ namespace DBHelper
             catch (Exception ex)
             {
                 retValue = false;
-                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
-                      .Select(ex1 => ex1.Message);
+                
 
-                errMessage = String.Join(Environment.NewLine + "\t", error1);
+                errMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message));
                 if (isLogging)
                 {
                     logger.Log("..............................................................................................");
@@ -1338,10 +1336,10 @@ namespace DBHelper
             catch ( Exception ex)
             {
                 backupExists = false;
-                var error1 = ex.CollectThemAll(ex1 => ex1.InnerException)
-                      .Select(ex1 => ex1.Message);
+                
 
-                errorMessage = String.Join(Environment.NewLine + "\t", error1);
+                errorMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                      .Select(ex1 => ex1.Message));
                 if (isLogging)
                 {
                     logger.Log("..............................................................................................");
