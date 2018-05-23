@@ -17,10 +17,10 @@ namespace IOHelper.Common
         public static double FreeSpace(string driveLetter, DiskSizeUnit sizeUnit = DiskSizeUnit.MegaBytes)
         {
             double whatIsFreeSpace = -1;
-            DriveInfo driveInfo = new DriveInfo(driveLetter);
+            var driveInfo = new DriveInfo(driveLetter);
 
             {
-                long freeSpaceNative = driveInfo.AvailableFreeSpace;
+                var freeSpaceNative = driveInfo.AvailableFreeSpace;
                 var dividedBy = Math.Pow(1024, (int)sizeUnit);
 
                 whatIsFreeSpace = freeSpaceNative / dividedBy;
