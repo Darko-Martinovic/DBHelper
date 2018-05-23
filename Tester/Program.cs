@@ -18,10 +18,10 @@ public class Program
         static void Main(string[] args)
         {
             
-            string errorMessage = string.Empty;
+            var errorMessage = string.Empty;
 
 
-            String connectionString = ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString;
+            var connectionString = ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString;
             var sqlConnection = new SqlConnection(connectionString);
             var cnn = new ServerConnection(sqlConnection);
             ILog logger = new Logger();

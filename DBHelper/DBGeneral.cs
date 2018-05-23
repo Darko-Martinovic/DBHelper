@@ -1280,9 +1280,6 @@ namespace DBHelper
                                     ref long totalSizeInBytes,
                                     ref string errorMessage)
         {
-            if (errorMessage == null) throw new ArgumentNullException(nameof(errorMessage));
-            if (numberOfFiles <= 0) throw new ArgumentOutOfRangeException(nameof(numberOfFiles));
-            if (totalSizeInBytes <= 0) throw new ArgumentOutOfRangeException(nameof(totalSizeInBytes));
             var backupExists = true;
             Database db = null;
             Server server = null;
