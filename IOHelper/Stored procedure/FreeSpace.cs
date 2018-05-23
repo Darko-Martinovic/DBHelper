@@ -1,31 +1,34 @@
 using System;
 using System.Data.SqlTypes;
+using IOHelper.Common;
 using Microsoft.SqlServer.Server;
-using static IOHelper.DriveHelper;
 
-public partial class StoredProcedures
+namespace IOHelper.Stored_procedure
 {
-    [Microsoft.SqlServer.Server.SqlProcedure]
-    public static void FreeSpace 
-        (
-                [SqlFacet(MaxSize = 1)] SqlString driveLetter,
-                [SqlFacet(IsNullable = true, MaxSize = 4)]SqlInt16 unitOfMeasure,
-                ref SqlDouble freeSpace,
-                ref SqlString errorMessage
-        )
+    public partial class StoredProcedures
     {
-        SqlString captureMessage = null;
-        freeSpace = 0;
-        try
+        [Microsoft.SqlServer.Server.SqlProcedure]
+        public static void FreeSpace 
+        (
+            [SqlFacet(MaxSize = 1)] SqlString driveLetter,
+            [SqlFacet(IsNullable = true, MaxSize = 4)]SqlInt16 unitOfMeasure,
+            ref SqlDouble freeSpace,
+            ref SqlString errorMessage
+        )
         {
-            freeSpace = IOHelper.DriveHelper.FreeSpace(driveLetter.Value, (DiskSizeUnit)unitOfMeasure.Value);
+            SqlString captureMessage = null;
+            freeSpace = 0;
+            try
+            {
+                freeSpace = DriveHelper.FreeSpace(driveLetter.Value, (DriveHelper.DiskSizeUnit)unitOfMeasure.Value);
+            }
+            catch ( Exception ex)
+            {
+                captureMessage = new SqlString(ex.Message);
+                if (ex.InnerException != null)
+                    captureMessage += $"\r\n{ex.InnerException.Message}";
+            }
+            errorMessage = captureMessage;
         }
-        catch ( Exception ex)
-        {
-            captureMessage = new SqlString(ex.Message);
-            if (ex.InnerException != null)
-                captureMessage += "\r\n" + ex.InnerException.Message;
-        }
-        errorMessage = captureMessage;
     }
 }

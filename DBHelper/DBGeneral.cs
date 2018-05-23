@@ -7,12 +7,6 @@ using System.Data;
 using Converter.Extension;
 using System.Linq;
 
-/// <summary>
-/// T-SQL EQUIVALENT ZA SVAKI DIO 
-/// WIN.FORMS TESTER 
-/// SCRIPTER 
-/// ALTER TABLE ADD COLUMN
-/// </summary>
 namespace DBHelper
 {
 
@@ -25,9 +19,9 @@ namespace DBHelper
 
     #endregion
 
-    public static class DBGeneral
+    public static class DbGeneral
     {
-        public const string LAST_BACKUP = "LastBackup";
+        public const string LastBackup = "LastBackup";
 
         #region  Backup rutine 
 
@@ -40,6 +34,7 @@ namespace DBHelper
         /// <param name="logger"></param>
         /// <param name="errMessage"></param>
         /// <param name="doVerify"></param>
+        /// <param name="useCompression"></param>
         /// <returns></returns>
         public static bool BackupDatabase(ServerConnection cnn, 
                                             ILog logger,  
@@ -47,15 +42,15 @@ namespace DBHelper
                                             bool doVerify = true, 
                                             bool useCompression = true)
         {
-            bool retValue = false;
-            bool isLogging = logger == null ? false : true;
+            var retValue = false;
+            var isLogging = logger != null;
 
             Server server = null;
             Backup source = null;
             BackupDeviceItem destination = null;
             Restore restore = null;
-            string dataBaseName = cnn.DatabaseName;
-            string errMesage = string.Empty;
+            var dataBaseName = cnn.DatabaseName;
+            var errMesage = string.Empty;
             try
             {
                 cnn.Connect();
@@ -70,42 +65,44 @@ namespace DBHelper
                 if ( isLogging)
                 { 
                     logger.Log(@"..............................................................................................");
-                    logger.Log(@"BACKUP FILE : " + backupFileName );
+                    logger.Log($@"BACKUP FILE : {backupFileName}");
                     logger.Log(@"..............................................................................................");
                 }
 
-                // instantaniate backup 
-                source = new Backup();
-
                 // Depends on SQL Server Edition
-                bool canIUseCompression = false;
-                if (server.EngineEdition == Edition.EnterpriseOrDeveloper || server.EngineEdition == Edition.Standard)
-                    canIUseCompression = true;
+                var canIUseCompression = server.EngineEdition == Edition.EnterpriseOrDeveloper ||
+                                         server.EngineEdition == Edition.Standard;
 
-                source.Action = BackupActionType.Database;
-                source.CopyOnly = true;
-                source.Checksum = true;
+                // instantaniate backup 
+                source = new Backup
+                {
+                    Action = BackupActionType.Database,
+                    CopyOnly = true,
+                    Checksum = true,
+                    Incremental = false,
+                    BackupSetDescription = "dbHelper BACKUP " + dataBaseName,
+                    BackupSetName = "COPY ONLY(FULL) dbHelper BACKUP " + dataBaseName,
+                    ContinueAfterError = false,
+                    SkipTapeHeader = true,
+                    UnloadTapeAfter = false,
+                    NoRewind = true,
+                    FormatMedia = true,
+                    Initialize = true
+                };
 
-                source.Incremental = false;
-                source.BackupSetDescription = "dbHelper BACKUP " + dataBaseName;
-                source.BackupSetName = "COPY ONLY(FULL) dbHelper BACKUP " + dataBaseName;
-                source.ContinueAfterError = false;
+
+
 
                 if (useCompression && canIUseCompression)
                     source.CompressionOption = BackupCompressionOptions.On;
 
-                source.SkipTapeHeader = true;
-                source.UnloadTapeAfter = false;
-                source.NoRewind = true;
-                source.FormatMedia = true;
-                source.Initialize = true;
 
 
 
                 source.PercentComplete += (object sender, PercentCompleteEventArgs e) =>
                 {
                     if (isLogging)
-                        logger.Log("\t" + "Doing backup : " + e.Percent.ToString().Trim() + "%" );
+                        logger.Log($"\tDoing backup : {e.Percent.ToString().Trim()}%");
                 };
 
                 source.Complete += (object sender, ServerMessageEventArgs e) =>
@@ -167,23 +164,24 @@ namespace DBHelper
                     }
                 }
 
-                Database db = server.Databases[dataBaseName];
+                var db = server.Databases[dataBaseName];
 
 
                 // EXEC sys.sp_addextendedproperty @name = N'LastBackup', @value = N'D:\bb\dbHelper_AdventureWorks2014_20180223_21_35_16.bak'
-                if (db.ExtendedProperties[LAST_BACKUP] == null)
+                if (db.ExtendedProperties[LastBackup] == null)
                 {
-                    ExtendedProperty extProperty = new ExtendedProperty();
-                    extProperty.Parent = db;
-                    extProperty.Name = LAST_BACKUP;
-                    extProperty.Value = backupFileName;
+                    var extProperty = new ExtendedProperty
+                    {
+                        Parent = db,
+                        Name = LastBackup,
+                        Value = backupFileName
+                    };
                     extProperty.Create();
                 }
                 else
                 {
-                    ExtendedProperty extProperty = db.ExtendedProperties[LAST_BACKUP];
-                    extProperty.Value = backupFileName;
-                    extProperty.Alter();
+                    db.ExtendedProperties[LastBackup].Value = backupFileName;
+                    db.ExtendedProperties[LastBackup].Alter();
                 }
 
                 if (cnn.IsOpen)
@@ -200,20 +198,20 @@ namespace DBHelper
                 }
                 retValue = false;
 
-                errMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                errMessage = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
                            .Select(ex1 => ex1.Message));
 
 
                 if (isLogging)
                 {
-                    logger.Log("Error during backup : " + errMessage );
+                    logger.Log($"Error during backup : {errMessage}");
                     logger.Log(@".............................................................................................." );
                 }
 
             }
             finally
             {
-                if (cnn != null && cnn.IsOpen)
+                if (cnn.IsOpen)
                     cnn.Disconnect();
                 server = null;
                 source = null;
@@ -231,10 +229,10 @@ namespace DBHelper
 
         public static bool CheckDb(ServerConnection cnn, ILog logger, ref string errMessage)
         {
-            bool retValue = true;
-            bool isLogging = logger == null ? false : true;
+
+            var retValue = true;
+            var isLogging = logger != null;
             Server server = null;
-            string dataBaseName = null;
             errMessage = string.Empty;
             try
             {
@@ -242,24 +240,20 @@ namespace DBHelper
 
 
                 server = new Server(cnn);
-                dataBaseName = cnn.DatabaseName;
+                var dataBaseName = cnn.DatabaseName;
                 Database db = server.Databases[dataBaseName];
-                ///-------------------------------------------
-                ///put database in single user mode 
-                ///..........................................
-                ///
+
                 PutDbInUserMode(cnn, DatabaseUserAccess.Single, true, logger,ref errMessage);
                 //DBCC CHECKALLOC(N'AdventureWorks2014', REPAIR_ALLOW_DATA_LOSS)  WITH NO_INFOMSGS
-                StringCollection strings1 = db.CheckAllocations(RepairType.AllowDataLoss);
+                var strings1 = db.CheckAllocations(RepairType.AllowDataLoss);
                 //DBCC CHECKCATALOG
-                StringCollection strings2 = db.CheckCatalog();
+                var strings2 = db.CheckCatalog();
                 //DBCC CHECKDB(N'AdventureWorks2014', REPAIR_ALLOW_DATA_LOSS)  WITH  NO_INFOMSGS , DATA_PURITY
-                StringCollection strings3 = db.CheckTables(RepairType.AllowDataLoss, RepairOptions.NoInformationMessages, RepairStructure.DataPurity);
+                var strings3 = db.CheckTables(RepairType.AllowDataLoss, RepairOptions.NoInformationMessages, RepairStructure.DataPurity);
 
 
                 //ALTER DATABASE [AdventureWorks2014] SET  MULTI_USER WITH ROLLBACK IMMEDIATE
                 PutDbInUserMode(cnn, DatabaseUserAccess.Multiple, true, logger,  ref errMessage);
-                /// TO DO DISPLAY result 
                 db = null;
             }
             catch (Exception ex)
@@ -271,12 +265,12 @@ namespace DBHelper
                 retValue = false;
                 
 
-                errMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                errMessage = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
                            .Select(ex1 => ex1.Message));
 
                 if (isLogging)
                 {
-                    logger.Log("Error during checking database : " + errMessage );
+                    logger.Log($"Error during checking database : {errMessage}");
                     logger.Log(@".............................................................................................." );
                 }
 
@@ -311,9 +305,9 @@ namespace DBHelper
         {
             bool retValue = true;
             Server server = null;
-            bool isLogging = logger == null ? false : true;
+            bool isLogging = logger != null;
             DatabaseUserAccess dbMode = mode;
-            string dataBaseName = cnn.DatabaseName;
+            var dataBaseName = cnn.DatabaseName;
             Database db = null;
             try
             {
@@ -321,7 +315,7 @@ namespace DBHelper
 
                 if (isLogging)
                 {
-                    logger.Log(@"Trying to put database in mode : " + dbMode.ToString() );
+                    logger.Log($@"Trying to put database in mode : {dbMode}");
                     logger.Log("..............................................................................................");
                 }
                 db = server.Databases[dataBaseName];
@@ -329,7 +323,7 @@ namespace DBHelper
                 {
                     if (isLogging)
                     {
-                        logger.Log("The database is already in mode : " + dbMode.ToString() + "." );
+                        logger.Log($"The database is already in mode : {dbMode}.");
                         logger.Log(@".............................................................................................." );
                     }
                     if (cnn.IsOpen)
@@ -338,7 +332,7 @@ namespace DBHelper
                     }
                     server = null;
                     db = null;
-                    return retValue;
+                    return true;
                 }
 
                 // dbMode is the argument we passed to this routine
@@ -355,7 +349,8 @@ namespace DBHelper
                 server.Refresh();
                 if (isLogging)
                 {
-                    logger.Log("Successfully accomplished! The database " + dataBaseName + " has putted in new mode : " + dbMode.ToString() );
+                    logger.Log(
+                        $"Successfully accomplished! The database {dataBaseName} has putted in new mode : {dbMode}");
                     logger.Log("..............................................................................................");
                 }
 
@@ -369,21 +364,22 @@ namespace DBHelper
 
                 
 
-                errorMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                errorMessage = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
                              .Select(ex1 => ex1.Message));
 
                 retValue = false;
                 if (isLogging)
                 {
-                    logger.Log("There is an error during changing user access mode on the database : " + dataBaseName + " new mode : " + dbMode.ToString() );
-                    logger.Log("The error is : " + errorMessage );
+                    logger.Log(
+                        $"There is an error during changing user access mode on the database : {dataBaseName} new mode : {dbMode}");
+                    logger.Log($"The error is : {errorMessage}");
                     logger.Log(".............................................................................................." );
                 }
 
             }
             finally
             {
-                if (cnn != null && cnn.IsOpen)
+                if (cnn.IsOpen)
                 {
                     cnn.Disconnect();
                 }
@@ -402,14 +398,14 @@ namespace DBHelper
 
         public static bool KillAllProcessesForOneDatabase(ServerConnection cnn, ref string errorLog)
         {
-            bool retValue = true;
+            var retValue = true;
             cnn.Connect();
 
-            Server Server = new Server(cnn);
+            var server = new Server(cnn);
             string databaseName = cnn.DatabaseName;
             try
             {
-                Server.KillAllProcesses(databaseName);
+                server.KillAllProcesses(databaseName);
                 retValue = true;
             }
             catch (Exception ex)
@@ -417,19 +413,19 @@ namespace DBHelper
                 retValue = false;
                 
 
-                errorLog = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                errorLog = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
                       .Select(ex1 => ex1.Message));
 
 
             }
             finally
             {
-                if (cnn != null && cnn.IsOpen)
+                if (cnn.IsOpen)
                 {
                     cnn.Disconnect();
                 }
              
-                Server = null;
+                server = null;
             }
 
             return retValue;
@@ -452,7 +448,7 @@ namespace DBHelper
             Server server = null;
             Database db = null;
             double retValue = 0;
-            string databaseName = cnn.DatabaseName;
+            var databaseName = cnn.DatabaseName;
             try
             {
                 cnn.Connect();
@@ -468,13 +464,13 @@ namespace DBHelper
                 }
                 
 
-                errorLog = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                errorLog = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
                       .Select(ex1 => ex1.Message));
 
             }
             finally
             {
-                if (cnn != null && cnn.IsOpen)
+                if (cnn.IsOpen)
                 {
                     cnn.Disconnect();
                 }
@@ -510,7 +506,7 @@ namespace DBHelper
 
             bool retValue = true;
             Server server = null;
-            bool isLogging = logger == null ? false : true;
+            bool isLogging = logger != null;
             Database db = null;
             string dataBaseName = cnn.DatabaseName;
             try
@@ -520,7 +516,7 @@ namespace DBHelper
 
                 if (isLogging)
                 {
-                    logger.Log("Setting recovery mode : " + dbMode.ToString() );
+                    logger.Log($"Setting recovery mode : {dbMode}");
                     logger.Log(@".............................................................................................." );
                 }
                 db = server.Databases[dataBaseName];
@@ -528,7 +524,7 @@ namespace DBHelper
                 {
                     if (isLogging)
                     {
-                        logger.Log("The database is already in required mode : " + dbMode.ToString() + "." );
+                        logger.Log($"The database is already in required mode : {dbMode}.");
                         logger.Log(".............................................................................................." );
                     }
                     if (cnn.IsOpen)
@@ -537,7 +533,7 @@ namespace DBHelper
                     }
                     server = null;
                     db = null;
-                    return retValue;
+                    return true;
                 }
                 db.RecoveryModel = dbMode;
                 if (killUserProcess)
@@ -549,7 +545,8 @@ namespace DBHelper
                 server.Refresh();
                 if (isLogging)
                 {
-                    logger.Log("Successfully complited. The database : " + dataBaseName + " has been putted in recovery mode : " + dbMode.ToString() );
+                    logger.Log(
+                        $"Successfully complited. The database : {dataBaseName} has been putted in recovery mode : {dbMode}");
                     logger.Log(".............................................................................................." );
                 }
 
@@ -560,21 +557,22 @@ namespace DBHelper
                     Debugger.Break();
 
                 
-                errorMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                errorMessage = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
                       .Select(ex1 => ex1.Message));
 
                 retValue = false;
                 if (isLogging)
                 {
-                    logger.Log("There is an error during operation setting database : " + dataBaseName + " into new mode : " + dbMode.ToString() );
-                    logger.Log("The error is  " + errorMessage );
+                    logger.Log(
+                        $"There is an error during operation setting database : {dataBaseName} into new mode : {dbMode}");
+                    logger.Log($"The error is  {errorMessage}");
                     logger.Log(".............................................................................................." );
                 }
 
             }
             finally
             {
-                if (cnn != null && cnn.IsOpen)
+                if (cnn.IsOpen)
                 {
                     cnn.Disconnect();
                 }
@@ -604,8 +602,7 @@ namespace DBHelper
             Server server = null;
             Restore destination = null;
             BackupDeviceItem source = null;
-            bool isLogging = logger == null ? false : true;
-            string backupFileName = string.Empty;
+            bool isLogging = logger != null;
             Database db1 = null;
             string dataBaseName = cnn.DatabaseName;
             try
@@ -613,7 +610,7 @@ namespace DBHelper
                 if (isLogging)
                 {
                     logger.Log(".............................................................................................." );
-                    logger.Log("Restoring the database " + dataBaseName );
+                    logger.Log($"Restoring the database {dataBaseName}");
                     logger.Log(".............................................................................................." );
                 }
                 cnn.Connect();
@@ -622,7 +619,8 @@ namespace DBHelper
 
                 Database db = server.Databases[dataBaseName];
 
-                if (db.ExtendedProperties[LAST_BACKUP] == null)
+                string backupFileName;
+                if (db.ExtendedProperties[LastBackup] == null)
                 {
                     errMessage = "There is no information about last backup!!!";
                     if (isLogging)
@@ -635,21 +633,22 @@ namespace DBHelper
                 }
                 else
                 {
-                    ExtendedProperty extProperty = db.ExtendedProperties[LAST_BACKUP];
-                    backupFileName = extProperty.Value.ToString();
+                    backupFileName = db.ExtendedProperties[LastBackup].Value.ToString();
 
                 }
 
 
-                destination = new Restore();
-                destination.PercentCompleteNotification = 5;
+                destination = new Restore
+                {
+                    PercentCompleteNotification = 5,
+                    RestrictedUser = true
+                };
 
-                destination.RestrictedUser = true;
                 destination.PercentComplete += (object sender, PercentCompleteEventArgs e) =>
                 {
                     if (isLogging)
                     {
-                        logger.Log("\t" + "Restoring : " + e.Percent.ToString().Trim() + "%" );
+                        logger.Log($"\tRestoring : {e.Percent.ToString().Trim()}%");
                     }
 
                 };
@@ -692,17 +691,17 @@ namespace DBHelper
                 db1 = server.Databases[dataBaseName];
                 db1.UserAccess = DatabaseUserAccess.Multiple;
                 db1.Alter(TerminationClause.RollbackTransactionsImmediately);
-                if (db1.ExtendedProperties[LAST_BACKUP] == null)
+                if (db1.ExtendedProperties[LastBackup] == null)
                 {
                     ExtendedProperty extProperty = new ExtendedProperty();
                     extProperty.Parent = db1;
-                    extProperty.Name = LAST_BACKUP;
+                    extProperty.Name = LastBackup;
                     extProperty.Value = backupFileName;
                     extProperty.Create();
                 }
                 else
                 {
-                    ExtendedProperty extProperty = db1.ExtendedProperties[LAST_BACKUP];
+                    ExtendedProperty extProperty = db1.ExtendedProperties[LastBackup];
                     extProperty.Value = backupFileName;
                     extProperty.Alter();
                 }
@@ -718,19 +717,19 @@ namespace DBHelper
                 retValue = false;
                 
 
-                errMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                errMessage = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
                       .Select(ex1 => ex1.Message));
 
                 if (isLogging)
                 {
-                    logger.Log("Error during restoring : " + errMessage );
+                    logger.Log($"Error during restoring : {errMessage}");
                     logger.Log(".............................................................................................." );
                 }
 
             }
             finally
             {
-                if (cnn != null && cnn.IsOpen)
+                if (cnn.IsOpen)
                     cnn.Disconnect();
                 server = null;
                 source = null;
@@ -748,17 +747,17 @@ namespace DBHelper
         /// DBCC SHRINKFILE(N'AdventureWorks2014_Log' , 256, TRUNCATEONLY)
         /// </summary>
         /// <param name="cnn"></param>
-        /// <param name="TargetLogFileSizeMB"></param>
+        /// <param name="targetLogFileSizeMb"></param>
         /// <param name="logger"></param>
         /// <param name="errMessage"></param>
         /// <returns></returns>
-        public static bool ShrinkLog(ServerConnection cnn,  int TargetLogFileSizeMB,ILog logger,  ref string errMessage)
+        public static bool ShrinkLog(ServerConnection cnn,  int targetLogFileSizeMb,ILog logger,  ref string errMessage)
         {
-            bool retValue = true;
-            bool isLogging = logger == null ? false : true;
+            var retValue = true;
+            var isLogging = logger != null;
             Server server = null;
             Database db = null;
-            string dataBaseName = cnn.DatabaseName;
+            var dataBaseName = cnn.DatabaseName;
             try
             {
                 cnn.Connect();
@@ -769,18 +768,18 @@ namespace DBHelper
                 if (isLogging)
                 {
                     logger.Log(".............................................................................................." );
-                    logger.Log("Recovery model " + db.RecoveryModel.ToString() + " Shrinking log " );
+                    logger.Log($"Recovery model {db.RecoveryModel} Shrinking log ");
                     logger.Log(".............................................................................................." );
                 }
 
                 double before = db.LogFiles[0].Size / 1024;
                 if (isLogging)
                 {
-                    logger.Log("The log size before shrinking is : " + before.ToString() + " in MB " );
+                    logger.Log($"The log size before shrinking is : {before} in MB ");
                     logger.Log(".............................................................................................." );
                 }
 
-                db.LogFiles[0].Shrink(TargetLogFileSizeMB, ShrinkMethod.TruncateOnly);
+                db.LogFiles[0].Shrink(targetLogFileSizeMb, ShrinkMethod.TruncateOnly);
 
                 db.LogFiles[0].Refresh();
                 if (isLogging)
@@ -792,9 +791,9 @@ namespace DBHelper
 
                 if (isLogging)
                 {
-                    logger.Log("The log size after shrinking : " + after.ToString() + " in MB " );
+                    logger.Log($"The log size after shrinking : {after} in MB ");
                     logger.Log(".............................................................................................." );
-                    logger.Log("The log has been reduced " + (before - after).ToString() + " in MB" );
+                    logger.Log($"The log has been reduced {(before - after)} in MB");
                 }
                 if (cnn.IsOpen)
                 {
@@ -810,12 +809,12 @@ namespace DBHelper
                 retValue = false;
                 
 
-                errMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                errMessage = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
                       .Select(ex1 => ex1.Message));
 
                 if (isLogging)
                 {
-                    logger.Log("There is an error during shrinking : " + errMessage );
+                    logger.Log($"There is an error during shrinking : {errMessage}");
                     logger.Log(".............................................................................................." );
                 }
 
@@ -823,7 +822,7 @@ namespace DBHelper
             finally
             {
                 db = null;
-                if (cnn != null && cnn.IsOpen)
+                if (cnn.IsOpen)
                 {
                     cnn.Disconnect();
                 }
@@ -845,17 +844,17 @@ namespace DBHelper
         /// Performs a backup
         /// </summary>
         /// <param name="cnn">connection to the server instance</param>
-        /// <param name="targetLogSizeInMB">target log size in MB</param>
+        /// <param name="targetLogSizeInMb">target log size in MB</param>
         /// <param name="killUserProcess">do we kill user process before</param>
         /// <param name="logger"></param>
         /// <param name="errorMessage">capture the error message</param>
         /// <returns></returns>
-        public static bool ForceShrinkingLog(ServerConnection cnn, int targetLogSizeInMB, bool killUserProcess, ILog logger,  ref string errorMessage)
+        public static bool ForceShrinkingLog(ServerConnection cnn, int targetLogSizeInMb, bool killUserProcess, ILog logger,  ref string errorMessage)
         {
 
             bool retValue = true;
             Server server = null;
-            bool isLogging = logger == null ? false : true;
+            bool isLogging = logger != null;
             Database db = null;
             bool changeMode = false;
             string dataBaseName = cnn.DatabaseName;
@@ -881,7 +880,7 @@ namespace DBHelper
                     }
                 }
                 //DBCC SHRINKFILE(N'AdventureWorks2014_Log' , 256, TRUNCATEONLY)
-                if (!ShrinkLog(cnn, targetLogSizeInMB, logger,  ref errorMessage ))
+                if (!ShrinkLog(cnn, targetLogSizeInMb, logger,  ref errorMessage ))
                 {
                     throw new Exception("I’m not able to shrink the database log file!");
                 }
@@ -891,7 +890,7 @@ namespace DBHelper
                     {
                         throw new Exception("I'm not able to put the database in full recovery mode");
                     }
-                    string backupFileName = string.Empty;
+                    var backupFileName = string.Empty;
                     if (BackupDatabase(cnn, logger,  ref errorMessage, true) == false)
                     {
                         throw new Exception("I'm not able to perform backup!");
@@ -906,19 +905,19 @@ namespace DBHelper
                 }
                 
 
-                errorMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                errorMessage = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
                       .Select(ex1 => ex1.Message));
 
                 retValue = false;
                 if (isLogging)
                 {
-                    logger.Log("The error is  : " + errorMessage );
+                    logger.Log($"The error is  : {errorMessage}");
                     logger.Log(".............................................................................................." );
                 }
             }
             finally
             {
-                if (cnn != null && cnn.IsOpen)
+                if (cnn.IsOpen)
                 {
                     cnn.Disconnect();
                 }
@@ -956,11 +955,11 @@ namespace DBHelper
         /// </returns>
         public static bool IsTheDataBaseOnLine(ServerConnection cnn, ILog logger, ref string errMessage )
         {
-            bool retValue = true;
-            bool isLogging = logger == null ? false : true;
-            string dataBaseName = cnn.DatabaseName;
-            Server server = new Server(cnn.ServerInstance);
-            Database db = server.Databases[dataBaseName];
+            var retValue = true;
+            var isLogging = logger != null;
+            var dataBaseName = cnn.DatabaseName;
+            var server = new Server(cnn.ServerInstance);
+            var db = server.Databases[dataBaseName];
             errMessage = string.Empty;
             try
             {
@@ -969,14 +968,14 @@ namespace DBHelper
                 if (db.Status == DatabaseStatus.Normal)
                 {
                     logger.Log("..............................................................................................");
-                    logger.Log("The database \"" + dataBaseName + "\" is ONLINE!");
+                    logger.Log($"The database \"{dataBaseName}\" is ONLINE!");
                     logger.Log("..............................................................................................");
                 }
                 else
                 {
                     retValue = false;
                     logger.Log("..............................................................................................");
-                    logger.Log("The database \"" + dataBaseName + "\" is NOT ONLINE");
+                    logger.Log($"The database \"{dataBaseName}\" is NOT ONLINE");
                     logger.Log("..............................................................................................");
                 }
             }
@@ -989,22 +988,22 @@ namespace DBHelper
 
                 
 
-                errMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                errMessage = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
                            .Select(ex1 => ex1.Message));
 
                 if (retValue == false)
                 {
                     if (isLogging)
                     {
-                        logger.Log("The database \"" + dataBaseName + "\" does not exists!");
-                        logger.Log("Exception : " + errMessage);
+                        logger.Log($"The database \"{dataBaseName}\" does not exists!");
+                        logger.Log($"Exception : {errMessage}");
                         logger.Log("..............................................................................................");
                     }
                 }
             }
             finally
             {
-                if (cnn != null && cnn.IsOpen)
+                if (cnn.IsOpen)
                 {
                     cnn.Disconnect();
                 }
@@ -1026,27 +1025,24 @@ namespace DBHelper
         /// <returns></returns>
         public static bool IsThereAnyBackupTaken(ServerConnection cnn, ILog logger,  ref string errorLog)
         {
-            bool result = true;
+            var result = true;
             Server server = null;
             Database db = null;
-            ExtendedProperty extProperty = null;
             try
             {
                 cnn.Connect();
                 server = new Server(cnn);
                 db = server.Databases[cnn.DatabaseName];
-                if ((db.ExtendedProperties[LAST_BACKUP] == null))
+                int numberOfBackupFiles =0;
+                long totalSizeInBytes = 0;
+                if ((db.ExtendedProperties[LastBackup] == null))
                 {
                     result = false;
                     errorLog = "Backup via dbHelper has not done";
                 }
                 else
                 {
-                    extProperty = db.ExtendedProperties[LAST_BACKUP];
-                    
-                    int numberOfBackupFiles =0;
-                    Int64 totalSizeInBytes = 0;
-                    bool backupExists = DetermineNumberOfBackupFiles(cnn, logger, ref numberOfBackupFiles, ref totalSizeInBytes,ref errorLog);
+                    var backupExists = DetermineNumberOfBackupFiles(cnn, logger, ref numberOfBackupFiles, ref totalSizeInBytes,ref errorLog);
                     if ( backupExists == false )
                     {
                         result = false;
@@ -1061,7 +1057,7 @@ namespace DBHelper
             {
                 
 
-                errorLog = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                errorLog = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
                             .Select(ex1 => ex1.Message));
 
             }
@@ -1086,10 +1082,10 @@ namespace DBHelper
 
         public static bool CanIPerformABackup(ServerConnection cnn, ILog logger, ref string errMessage)
         {
-            bool retValue = true;
+            var retValue = true;
             Database db = null;
             Server server = null;
-            bool isLogging = logger == null ? false : true;
+            var isLogging = logger != null;
             errMessage = string.Empty;
             try
             {
@@ -1104,11 +1100,11 @@ namespace DBHelper
                 cnn.Connect();
                 server = new Server(cnn);
                 db = server.Databases[cnn.DatabaseName];
-                double dataBaseSize = db.Size;
-                double freeToUse = 0;
-                string driveLetterToCheck = server.BackupDirectory.Substring(0, 1);
+                var dataBaseSize = db.Size;
+                long freeToUse = 0;
+                var driveLetterToCheck = server.BackupDirectory.Substring(0, 1);
 
-                string command = @"DECLARE	@freeSpace float
+                var command = @"DECLARE	@freeSpace float
                                    DECLARE @errorMessage nvarchar(1000)
                                    EXEC [IOHELPER].[FreeSpace] @driveLetter = N'{0}', @freeSpace = @freeSpace OUTPUT, @errorMessage = @errorMessage OUTPUT;
                                    SELECT @freeSpace AS N'@freeSpace', @errorMessage AS N'@errorMessage'";
@@ -1116,7 +1112,7 @@ namespace DBHelper
                 DataSet ds = db.ExecuteWithResults(String.Format(command, driveLetterToCheck));
 
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
-                    freeToUse = (double)ds.Tables[0].Rows[0]["@freeSpace"];
+                    freeToUse = (long)ds.Tables[0].Rows[0]["@freeSpace"];
 
 
                 if ((freeToUse > dataBaseSize))
@@ -1124,7 +1120,8 @@ namespace DBHelper
                     if (isLogging)
                     {
                         logger.Log("..............................................................................................");
-                        logger.Log("Free on disk " + driveLetterToCheck + " in MB is : " + freeToUse.ToString() + " , and the expected backup size is  " + dataBaseSize.ToString() + " in MB");
+                        logger.Log(
+                            $"Free on disk {driveLetterToCheck} in MB is : {freeToUse} , and the expected backup size is  {dataBaseSize} in MB");
                         logger.Log("..............................................................................................");
                     }
                     retValue = true;
@@ -1134,7 +1131,8 @@ namespace DBHelper
                     if (isLogging)
                     {
                         logger.Log("..............................................................................................");
-                        logger.Log("There is no enough space on drive " + driveLetterToCheck + " in MB is : " + freeToUse.ToString() + " , and the expected backup size is  " + dataBaseSize.ToString() + " in MB");
+                        logger.Log(
+                            $"There is no enough space on drive {driveLetterToCheck} in MB is : {freeToUse} , and the expected backup size is  {dataBaseSize} in MB");
                         logger.Log("..............................................................................................");
                     }
                     retValue = false;
@@ -1146,12 +1144,13 @@ namespace DBHelper
                 retValue = false;
                 
 
-                errMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                errMessage = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
                       .Select(ex1 => ex1.Message));
                 if (isLogging)
                 {
                     logger.Log("..............................................................................................");
-                    logger.Log("An error occures while trying to determine free disk space. The error message :" + errMessage);
+                    logger.Log(
+                        $"An error occures while trying to determine free disk space. The error message :{errMessage}");
                     logger.Log("..............................................................................................");
                 }
 
@@ -1181,7 +1180,7 @@ namespace DBHelper
             Database db = null;
             Server server = null;
             errMessage = string.Empty;
-            bool isLogging = logger == null ? false : true;
+            bool isLogging = logger != null;
             try
             {
                 if (isLogging)
@@ -1194,15 +1193,15 @@ namespace DBHelper
                 cnn.Connect();
                 server = new Server(cnn);
                 db = server.Databases[cnn.DatabaseName];
-                string dataBaseName = cnn.DatabaseName;
+                var dataBaseName = cnn.DatabaseName;
 
-                string filter = "dbHelper_" + dataBaseName + "_*.BAK";
-                string backupDirectory = server.BackupDirectory;
+                string filter = $"dbHelper_{dataBaseName}_*.BAK";
+                var backupDirectory = server.BackupDirectory;
                 if (server.BackupDirectory.EndsWith(@"\") == false)
                     backupDirectory += @"\";
 
                 // setup calling the stored procedre. Notice the procedure is the result of publishing SQLCLR project 
-                string command = @"DECLARE @errorMessage nvarchar(1000)
+                var command = @"DECLARE @errorMessage nvarchar(1000)
                                    EXEC [IOHELPER].[DeleteFiles] @path = N'{0}', @filter = N'{1}', @errorMessage = @errorMessage OUTPUT;
                                    SELECT @errorMessage AS N'@errorMessage'";
                 // Execute stored procedure and return errormessage if any 
@@ -1217,11 +1216,12 @@ namespace DBHelper
                     if (isLogging)
                     {
                         logger.Log("..............................................................................................");
-                        logger.Log("I have been deleted in directory : " + backupDirectory + " files with following pattern " + filter);
+                        logger.Log(
+                            $"I have been deleted in directory : {backupDirectory} files with following pattern {filter}");
                         logger.Log("..............................................................................................");
                     }
-                    if (db.ExtendedProperties[LAST_BACKUP] != null)
-                        db.ExtendedProperties[LAST_BACKUP].Drop();
+                    if (db.ExtendedProperties[LastBackup] != null)
+                        db.ExtendedProperties[LastBackup].Drop();
 
                     retValue = true;
                 }
@@ -1230,8 +1230,10 @@ namespace DBHelper
                     if (isLogging)
                     {
                         logger.Log("..............................................................................................");
-                        logger.Log(@"There is an error when trying to delete old backup files in directory : " 
-                                    + backupDirectory + " files with following patther " + filter + "Error description : " + errMessage);
+                        logger.Log(
+                            $@"There is an error when trying to delete old backup files in directory : {
+                                backupDirectory
+                            } files with following patther {filter}Error description : {errMessage}");
                         logger.Log("..............................................................................................");
                     }
                     retValue = false;
@@ -1243,7 +1245,7 @@ namespace DBHelper
                 retValue = false;
                 
 
-                errMessage = String.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                errMessage = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
                       .Select(ex1 => ex1.Message));
                 if (isLogging)
                 {
@@ -1275,15 +1277,17 @@ namespace DBHelper
                                     ServerConnection cnn, 
                                     ILog logger,
                                     ref int numberOfFiles, 
-                                    ref Int64 totalSizeInBytes,
+                                    ref long totalSizeInBytes,
                                     ref string errorMessage)
         {
-            bool backupExists = true;
+            if (errorMessage == null) throw new ArgumentNullException(nameof(errorMessage));
+            if (numberOfFiles <= 0) throw new ArgumentOutOfRangeException(nameof(numberOfFiles));
+            if (totalSizeInBytes <= 0) throw new ArgumentOutOfRangeException(nameof(totalSizeInBytes));
+            var backupExists = true;
             Database db = null;
             Server server = null;
             bool checkIfExist = false;
-            bool isLogging = logger == null ? false : true;
-            ExtendedProperty extProperty = null;
+            bool isLogging = logger != null;
             numberOfFiles = 0;
             totalSizeInBytes = 0;
             errorMessage = string.Empty;
@@ -1300,26 +1304,26 @@ namespace DBHelper
                 cnn.Connect();
                 server = new Server(cnn);
                 db = server.Databases[cnn.DatabaseName];
-                string dataBaseName = cnn.DatabaseName;
-                string lastValidBackup = string.Empty;
+                var dataBaseName = cnn.DatabaseName;
+                var lastValidBackup = string.Empty;
 
 
-                if (db.ExtendedProperties[LAST_BACKUP] != null)
+                if (db.ExtendedProperties[LastBackup] != null)
                 {
                     checkIfExist = true;
-                    extProperty = db.ExtendedProperties[LAST_BACKUP];
+                    var extProperty = db.ExtendedProperties[LastBackup];
                     lastValidBackup = extProperty.Value.ToString();
                 }
 
 
-                string filter = "dbHelper_" + dataBaseName + "_*.BAK";
-                string backupDirectory = server.BackupDirectory;
+                var filter = $"dbHelper_{dataBaseName}_*.BAK";
+                var backupDirectory = server.BackupDirectory;
                 if (server.BackupDirectory.EndsWith(@"\") == false)
                     backupDirectory += @"\";
 
                 string command = @"SELECT * FROM [IOHELPER].[FileHelper] (N'{0}',N'{1}')";
 
-                DataSet ds = db.ExecuteWithResults(String.Format(command, backupDirectory, filter));
+                var ds = db.ExecuteWithResults(string.Format(command, backupDirectory, filter));
                 if (ds.Tables.Count > 0)
                 {
                     numberOfFiles = ds.Tables[0].Rows.Count;
@@ -1328,7 +1332,7 @@ namespace DBHelper
                         if (checkIfExist && r["Name"].ToString().Equals(lastValidBackup))
                             backupExists = true;
 
-                        totalSizeInBytes += (Int64)r["SizeInBytes"];
+                        totalSizeInBytes += (long)r["SizeInBytes"];
                     }
                 }
 
@@ -1343,7 +1347,8 @@ namespace DBHelper
                 if (isLogging)
                 {
                     logger.Log("..............................................................................................");
-                    logger.Log("An error occures while trying to determine how many backup file are taken. The error message :" + errorMessage);
+                    logger.Log(
+                        $"An error occures while trying to determine how many backup file are taken. The error message :{errorMessage}");
                     logger.Log("..............................................................................................");
                 }
             }
