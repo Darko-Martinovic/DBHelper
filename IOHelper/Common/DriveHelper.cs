@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 
-namespace IOHelper.Common
+namespace IOHelper
 {
-    public static class DriveHelper
+    static public class DriveHelper
     {
         public enum DiskSizeUnit
         {
@@ -17,11 +17,13 @@ namespace IOHelper.Common
         public static double FreeSpace(string driveLetter, DiskSizeUnit sizeUnit = DiskSizeUnit.MegaBytes)
         {
             double whatIsFreeSpace = -1;
-            var driveInfo = new DriveInfo(driveLetter);
+            double dividedBy= 1;
+            DriveInfo driveInfo = new DriveInfo(driveLetter);
 
+            if (driveInfo != null)
             {
-                var freeSpaceNative = driveInfo.AvailableFreeSpace;
-                var dividedBy = Math.Pow(1024, (int)sizeUnit);
+                long freeSpaceNative = driveInfo.AvailableFreeSpace;
+                dividedBy = Math.Pow(1024, (int)sizeUnit);
 
                 whatIsFreeSpace = freeSpaceNative / dividedBy;
             }
