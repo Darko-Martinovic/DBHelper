@@ -200,7 +200,7 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
 
             //
             // Create a new table object
-            // Set IsNode = true
+            // Set isEdge = true
             var tbl = new Table(db, tableName, schemaName)
             {
                 IsEdge = true
@@ -222,7 +222,7 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
 
             //
             // Create a new table object
-            // Set IsNode = true
+            // Set isEdge = true
             var tbl = new Table(db, tableName, schemaName)
             {
                 IsEdge = true
@@ -244,7 +244,7 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
 
             //
             // Create a new table object
-            // Set IsNode = true
+            // Set isEdge = true
             var tbl = new Table(db, tableName, schemaName)
             {
                 IsEdge = true
@@ -265,7 +265,7 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
 
             //
             // Create a new table object
-            // Set IsNode = true
+            // Set isEdge = true
             var tbl = new Table(db, tableName, schemaName)
             {
                 IsEdge = true
