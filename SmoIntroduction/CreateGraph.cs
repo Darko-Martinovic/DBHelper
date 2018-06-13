@@ -9,7 +9,7 @@ using Converter.Extension;
 
 namespace SmoIntroduction
 {
-    class CreateGraph
+    public class CreateGraph
     {
         private const string
             CServerVersion =
@@ -126,7 +126,7 @@ INSERT INTO friendof VALUES ((SELECT $NODE_ID FROM person WHERE ID = 5), (SELECT
 
 ");
 
-                var dataset = db.ExecuteWithResults(
+                using (var dataset = db.ExecuteWithResults(
                     @"-- Find Restaurants that John likes
 SELECT Restaurant.name
 FROM Person, likes, Restaurant
@@ -142,30 +142,31 @@ AND person1.name='John';
 SELECT Person.name
 FROM Person, likes, Restaurant, livesIn, City, locatedIn
 WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->City);
-");
+"))
+                {
 
-                Console.WriteLine("-----------------------------------------------");
-                Console.WriteLine("Find Restaurants that John likes");
-                Console.WriteLine("-----------------------------------------------");
-                foreach (DataRow r in dataset.Tables[0].Rows)
-                    Console.WriteLine("\t" + r[0]);
-                Console.WriteLine("-----------------------------------------------");
-                Console.WriteLine("Find Restaurants that John's friends like");
-                Console.WriteLine("-----------------------------------------------");
-                foreach (DataRow r in dataset.Tables[1].Rows)
-                    Console.WriteLine("\t" + r[0]);
-                Console.WriteLine("-----------------------------------------------");
-                Console.WriteLine("Find people who like a restaurant in the same city they live in");
-                Console.WriteLine("-----------------------------------------------");
-                foreach (DataRow r in dataset.Tables[2].Rows)
-                    Console.WriteLine("\t" + r[0]);
-                Console.WriteLine("-----------------------------------------------");
-
+                    Console.WriteLine("-----------------------------------------------");
+                    Console.WriteLine("Find Restaurants that John likes");
+                    Console.WriteLine("-----------------------------------------------");
+                    foreach (DataRow r in dataset.Tables[0].Rows)
+                        Console.WriteLine("\t" + r[0]);
+                    Console.WriteLine("-----------------------------------------------");
+                    Console.WriteLine("Find Restaurants that John's friends like");
+                    Console.WriteLine("-----------------------------------------------");
+                    foreach (DataRow r in dataset.Tables[1].Rows)
+                        Console.WriteLine("\t" + r[0]);
+                    Console.WriteLine("-----------------------------------------------");
+                    Console.WriteLine("Find people who like a restaurant in the same city they live in");
+                    Console.WriteLine("-----------------------------------------------");
+                    foreach (DataRow r in dataset.Tables[2].Rows)
+                        Console.WriteLine("\t" + r[0]);
+                    Console.WriteLine("-----------------------------------------------");
+                }
 
             }
             catch (Exception ex)
             {
-               
+
                 Console.WriteLine(string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
                     .Select(ex1 => ex1.Message)));
 
