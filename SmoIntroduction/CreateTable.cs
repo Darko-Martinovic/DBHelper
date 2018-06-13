@@ -13,11 +13,11 @@ namespace SmoIntroduction
 
     public class CreateTable
     {
-      
-        private const string CNewline = "\r\n";
-        
 
-       
+        private const string CNewline = "\r\n";
+
+
+
         static void Main(string[] args)
         {
             var connectionString = ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString;
@@ -101,7 +101,7 @@ namespace SmoIntroduction
 
 
             // Add the varchar column
-            col = new Column(tbl, @"Name", DataType.VarChar(128)) {DataType = {MaximumLength = 128}};
+            col = new Column(tbl, @"Name", DataType.VarChar(128)) { DataType = { MaximumLength = 128 } };
             col.AddDefaultConstraint(null);
             col.DefaultConstraint.Text = "''";
             col.Nullable = false;
@@ -148,7 +148,7 @@ namespace SmoIntroduction
                 sb.Append(CNewline);
             }
 
-            string fileName = tableName + DateTime.Now.ToString("yyyy_mm_dd_HH_mm_ss") + ".txt";
+            string fileName = $"{tableName}{DateTime.Now:yyyy_mm_dd_HH_mm_ss}.txt";
             if (File.Exists(fileName))
                 File.Delete(fileName);
             File.WriteAllText(fileName, sb.ToString());
@@ -161,10 +161,8 @@ namespace SmoIntroduction
                 cnn.Disconnect();
                 cnn = null;
             }
-            if (db != null)
-                db = null;
-            if (server != null)
-                server = null;
+            db = null;
+            server = null;
 
             Console.Write($"Press any key to exit...{CNewline}");
             Console.ReadLine();

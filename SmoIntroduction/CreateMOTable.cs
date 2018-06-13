@@ -204,7 +204,7 @@ namespace SmoIntroduction
                 sb.Append(CNewline);
             }
 
-            string fileName = tableName + DateTime.Now.ToString("yyyy_mm_dd_HH_mm_ss") + ".txt";
+            string fileName = $"{tableName}{DateTime.Now:yyyy_mm_dd_HH_mm_ss}.txt";
             if (File.Exists(fileName))
                 File.Delete(fileName);
             File.WriteAllText(fileName, sb.ToString());
@@ -217,10 +217,8 @@ namespace SmoIntroduction
                 cnn.Disconnect();
                 cnn = null;
             }
-            if (db != null)
-                db = null;
-            if (server != null)
-                server = null;
+            db = null;
+            server = null;
 
             Console.Write($"Press any key to exit...{CNewline}");
             Console.ReadLine();
