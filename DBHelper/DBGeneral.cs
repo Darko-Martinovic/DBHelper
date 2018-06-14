@@ -2,7 +2,6 @@
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using System.Diagnostics;
-using System.Collections.Specialized;
 using System.Data;
 using Converter.Extension;
 using System.Linq;
@@ -277,7 +276,7 @@ namespace DBHelper
             }
             finally
             {
-                if (cnn != null && cnn.IsOpen)
+                if (cnn.IsOpen)
                     cnn.Disconnect();
                
                 server = null;
@@ -327,9 +326,7 @@ namespace DBHelper
                         logger.Log(@".............................................................................................." );
                     }
                     if (cnn.IsOpen)
-                    {
                         cnn.Disconnect();
-                    }
                     server = null;
                     db = null;
                     return true;
@@ -380,9 +377,7 @@ namespace DBHelper
             finally
             {
                 if (cnn.IsOpen)
-                {
                     cnn.Disconnect();
-                }
                 server = null;
                 db = null;
             }
@@ -421,10 +416,8 @@ namespace DBHelper
             finally
             {
                 if (cnn.IsOpen)
-                {
                     cnn.Disconnect();
-                }
-             
+           
                 server = null;
             }
 
@@ -471,9 +464,7 @@ namespace DBHelper
             finally
             {
                 if (cnn.IsOpen)
-                {
                     cnn.Disconnect();
-                }
                 server = null;
              
                 db = null;
@@ -528,9 +519,7 @@ namespace DBHelper
                         logger.Log(".............................................................................................." );
                     }
                     if (cnn.IsOpen)
-                    {
                         cnn.Disconnect();
-                    }
                     server = null;
                     db = null;
                     return true;
@@ -573,9 +562,7 @@ namespace DBHelper
             finally
             {
                 if (cnn.IsOpen)
-                {
                     cnn.Disconnect();
-                }
                 server = null;
                 db = null;
             }
@@ -796,9 +783,7 @@ namespace DBHelper
                     logger.Log($"The log has been reduced {(before - after)} in MB");
                 }
                 if (cnn.IsOpen)
-                {
                     cnn.Disconnect();
-                }
             }
             catch (Exception ex)
             {
@@ -823,9 +808,7 @@ namespace DBHelper
             {
                 db = null;
                 if (cnn.IsOpen)
-                {
                     cnn.Disconnect();
-                }
                 server = null;
             }
             return retValue;
@@ -918,9 +901,7 @@ namespace DBHelper
             finally
             {
                 if (cnn.IsOpen)
-                {
                     cnn.Disconnect();
-                }
                 server = null;
                 db = null;
             }
@@ -1004,9 +985,7 @@ namespace DBHelper
             finally
             {
                 if (cnn.IsOpen)
-                {
                     cnn.Disconnect();
-                }
                 server = null;
             }
 
@@ -1063,10 +1042,8 @@ namespace DBHelper
             }
             finally
             {
-                if (cnn != null && cnn.IsOpen)
-                {
+                if (cnn.IsOpen)
                     cnn.Disconnect();
-                }
                 server = null;
                 db = null;
             }
@@ -1157,10 +1134,8 @@ namespace DBHelper
             }
             finally
             {
-                if (cnn != null && cnn.IsOpen)
-                {
+                if (cnn.IsOpen)
                     cnn.Disconnect();
-                }
                 server = null;
                 db = null;
 
@@ -1257,10 +1232,8 @@ namespace DBHelper
             }
             finally
             {
-                if (cnn != null && cnn.IsOpen)
-                {
+                if (cnn.IsOpen)
                     cnn.Disconnect();
-                }
                 server = null;
                 db = null;
 
@@ -1351,10 +1324,8 @@ namespace DBHelper
             }
             finally
             {
-                if (cnn != null && cnn.IsOpen)
-                {
+                if (cnn.IsOpen)
                     cnn.Disconnect();
-                }
                 server = null;
                 db = null;
             }
