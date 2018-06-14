@@ -13,7 +13,6 @@ namespace Tester
 public class Program
     {
 
-        private const string CNewline = "\r\n";
 
         static void Main(string[] args)
         {
@@ -164,7 +163,7 @@ public class Program
 
 
 
-            Console.Write($"Press any key to exit...{CNewline}");
+            Console.WriteLine($"Press any key to exit...");
             Console.ReadLine();
 
         }
