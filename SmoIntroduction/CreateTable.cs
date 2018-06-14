@@ -157,10 +157,8 @@ namespace SmoIntroduction
 
 
             if (cnn.IsOpen)
-            {
                 cnn.Disconnect();
-                cnn = null;
-            }
+            cnn = null;
             db = null;
             server = null;
 

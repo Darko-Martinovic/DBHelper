@@ -174,14 +174,10 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
             finally
             {
                 if (cnn.IsOpen)
-                {
                     cnn.Disconnect();
-                    cnn = null;
-                }
-                if (db != null)
-                    db = null;
-                if (server != null)
-                    server = null;
+                cnn = null;
+                db = null;
+                server = null;
             }
             Console.WriteLine("Press any key to exit...");
             Console.ReadLine();
@@ -208,6 +204,8 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
 
             };
             tbl.Create();
+            tbl = null;
+
 
         }
 
@@ -230,6 +228,8 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
 
             };
             tbl.Create();
+            tbl = null;
+
 
         }
 
@@ -252,6 +252,8 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
 
             };
             tbl.Create();
+            tbl = null;
+
         }
 
         private static void CreateLikes(Database db)
@@ -275,7 +277,8 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
             var col = new Column(tbl, @"raiting", DataType.Int);
             tbl.Columns.Add(col);
             tbl.Create();
-
+            tbl = null;
+            col = null;
 
         }
 
@@ -324,6 +327,9 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
             col = new Column(tbl, @"stateName", DataType.VarChar(100)) { DataType = { MaximumLength = 100 } };
             tbl.Columns.Add(col);
             tbl.Create();
+            tbl = null;
+            col = null;
+
 
         }
 
@@ -375,6 +381,9 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
             col = new Column(tbl, @"city", DataType.VarChar(100)) { DataType = { MaximumLength = 100 } };
             tbl.Columns.Add(col);
             tbl.Create();
+            tbl = null;
+            col = null;
+            idx = null;
 
 
         }
@@ -420,6 +429,10 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
             col = new Column(tbl, @"name", DataType.VarChar(128)) { DataType = { MaximumLength = 100 } };
             tbl.Columns.Add(col);
             tbl.Create();
+            tbl = null;
+            idx = null;
+            col = null;
+
         }
     }
 }

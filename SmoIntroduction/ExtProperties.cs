@@ -292,15 +292,9 @@ namespace SmoIntroduction
             Console.WriteLine("Setup the extended property on user-defined type level");
 
             if (cnn.IsOpen)
-            {
                 cnn.Disconnect();
-                cnn = null;
-            }
-
-
-           
+            cnn = null;
             server = null;
-            
             Console.WriteLine("Press any key to exit...");
             Console.ReadLine();
 

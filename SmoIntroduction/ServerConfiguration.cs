@@ -15,11 +15,11 @@ namespace SmoIntroduction
         {
 
             var sb = new StringBuilder();
-           
+
             var connectionString = ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString;
 
             ServerConnection cnn;
-           
+
 
             using (var sqlConnection = new SqlConnection(connectionString))
             {
@@ -47,7 +47,7 @@ namespace SmoIntroduction
                 Console.WriteLine($"\t\t{cp.DisplayName} : {cp.RunValue}");
             }
 
-            
+
             var fileName = $"ServerConfig{DateTime.Now:yyyy_mm_dd_HH_mm_ss}.txt";
 
 
@@ -60,12 +60,8 @@ namespace SmoIntroduction
             Process.Start(fileName);
 
             if (cnn.IsOpen)
-            {
                 cnn.Disconnect();
-                cnn = null;
-            }
-
-
+            cnn = null;
             server = null;
             Console.WriteLine("Press any key to exit...");
             Console.ReadLine();

@@ -9,19 +9,19 @@ using System.Data.SqlClient;
 
 namespace SmoIntroduction
 {
-   
+
 
     public class CreateMoTable
     {
 
-     
+
         private const string CNewline = "\r\n";
-       
+
 
         //Hard coded the file group name and the container name
         private const string CFileGroup = "mofg";
         private const string CFileName = "mofile";
-      
+
         private const string CServerVersion = "13.0.4001.0"; // https://support.microsoft.com/en-us/help/3182545
 
         static void Main(string[] args)
@@ -162,10 +162,10 @@ namespace SmoIntroduction
 
             tbl.Indexes.Add(idx);
             idx.IndexedColumns.Add(new IndexedColumn(idx, col.Name));
-         
+
 
             // Add the varchar column
-            col = new Column(tbl, @"Name", DataType.VarChar(128)) {DataType = {MaximumLength = 128}};
+            col = new Column(tbl, @"Name", DataType.VarChar(128)) { DataType = { MaximumLength = 128 } };
             col.AddDefaultConstraint(null);
             col.DefaultConstraint.Text = "''";
             col.Nullable = false;
@@ -213,10 +213,8 @@ namespace SmoIntroduction
 
 
             if (cnn.IsOpen)
-            {
                 cnn.Disconnect();
-                cnn = null;
-            }
+            cnn = null;
             db = null;
             server = null;
 
@@ -228,4 +226,4 @@ namespace SmoIntroduction
 
 
     }
-    }
+}
