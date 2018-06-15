@@ -34,4 +34,12 @@ A console application that could be useful to make some tests.
 
 ## :white_check_mark: SmoIntroduction	
 
-A console application that was our first example
+CreateGraph                       | Shows how to create NODE & EDGE tables
+CreateMOTable                     | Shows how to create the memory optimized tables
+CreateTable                       | Shows how to create traditional - disk based tables
+ExtProperties                     | Shows how to manipulate with extended properties
+RebuildIndexes                    | Shows how to rebuild indexes and update statistics
+ServerConfiguration               | Shows how to get the server configuration
+ServerEvents                      | Shows how to subsribe to server events
+TDE                               | Shows how to encrypt the database
+
