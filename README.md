@@ -34,6 +34,9 @@ A console application that could be useful to make some tests.
 
 ## :white_check_mark: SmoIntroduction	
 
+
+Class Name                        | Class Description
+----------------------------------|--------------------------------------------------------------------------------------------
 CreateGraph                       | Shows how to create NODE & EDGE tables
 CreateMOTable                     | Shows how to create the memory optimized tables
 CreateTable                       | Shows how to create traditional - disk based tables
