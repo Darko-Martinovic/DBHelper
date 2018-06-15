@@ -1,9 +1,0 @@
-﻿
-namespace SmoIntroduction
-{
-    class Program
-    {
-
-    }
-}
-

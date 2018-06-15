@@ -40,7 +40,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>SmoIntroduction.CreateTable</StartupObject>
+    <StartupObject>SmoIntroduction.RebuildIndexes</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.SqlServer.BatchParserClient, Version=14.100.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
@@ -67,6 +67,7 @@
     <Compile Include="CreateTable.cs" />
     <Compile Include="ExtProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RebuildIndexes.cs" />
     <Compile Include="ServerConfiguration.cs" />
     <Compile Include="ServerEvents.cs" />
   </ItemGroup>
