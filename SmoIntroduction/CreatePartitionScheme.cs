@@ -91,7 +91,7 @@ namespace SmoIntroduction
                         VALUES (0), (1), (100), (200), (3000);");
 
 
-                // Exemine sys.dm_db_partition_stats
+                // Examine sys.dm_db_partition_stats
                 var dataset = db.ExecuteWithResults(
                     @"SELECT partition_number,row_count
                        FROM sys.dm_db_partition_stats
