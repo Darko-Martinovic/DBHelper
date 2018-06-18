@@ -67,9 +67,9 @@ namespace SmoIntroduction
                 partitionFunction.RangeValues = new object[] { 1, 100, 1000 };
                 partitionFunction.Create();
 
-                // Filegroup  test1fg    test2fg                    test3fg                       test4fg
-                // Partition  1          2                          3                             4
-                // Values     col1 <= 1  col1 > 1 AND col1 <= 100   col1 > 100 AND col1 <= 1000   col1 > 1000
+                // Filegroup  test1fg  |  test2fg                  |  test3fg                    |   test4fg
+                // Partition  1        |  2                        |  3                          |   4
+                // Values     col1 <= 1|  col1 > 1 AND col1 <= 100 |  col1 > 100 AND col1 <= 1000|   col1 > 1000
 
                 Console.WriteLine("Creating the partition scheme");
                 var partitionScheme = new PartitionScheme(db, "myRangePS1") { PartitionFunction = "myRangePF1" };
