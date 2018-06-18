@@ -14,10 +14,6 @@ namespace SmoIntroduction
     public class CreateMoTable
     {
 
-
-        private const string CNewline = "\r\n";
-
-
         //Hard coded the file group name and the container name
         private const string CFileGroup = "mofg";
         private const string CFileName = "mofile";
@@ -39,10 +35,10 @@ namespace SmoIntroduction
 
 
             cnn.Connect();
-            Console.Write($"Connected{CNewline}");
+            Console.WriteLine("Connected");
             //Create the server object
             var server = new Server(cnn);
-            Console.Write($"Create the server object{CNewline}");
+            Console.WriteLine("Create the server object");
             //Create the database object
             var db = server.Databases[databaseName];
 
@@ -51,7 +47,7 @@ namespace SmoIntroduction
             // Add MEMORY OPTIMIZED FILE GROUP AND FILE 
             if (server.Version >= new Version(CServerVersion))
             {
-                Console.Write($"Add support for memory optimized tables{CNewline}");
+                Console.WriteLine("Add support for memory optimized tables");
                 // First check if there is already memory optimized file group 
                 var isMemoryOptimizedFileGropuExists = false;
 
@@ -90,8 +86,8 @@ namespace SmoIntroduction
                         }
                         catch (Exception ex)
                         {
-                            Console.Write(ex.Message);
-                            Console.Write($"Press any key to exit...{CNewline}");
+                            Console.WriteLine(ex.Message);
+                            Console.WriteLine("Press any key to exit...");
                             Console.ReadLine();
                             return;
                         }
@@ -114,7 +110,7 @@ namespace SmoIntroduction
                 db.Schemas[schemaName].Create();
             }
 
-            Console.Write($"Create the schema object - if not exists{CNewline}");
+            Console.WriteLine("Create the schema object - if not exists");
 
             //
             //Drop the table if exists
@@ -122,10 +118,10 @@ namespace SmoIntroduction
             var tableName = ConfigurationManager.AppSettings["C_MO_TEST_TABLE"];
             if (db.Tables.Contains(tableName, schemaName))
                 db.Tables[tableName, schemaName].Drop();
-            Console.Write($"Droping the table if exists{CNewline}");
+            Console.WriteLine("Droping the table if exists");
 
 
-            Console.Write($"Create the table object {schemaName}.{tableName}{CNewline}");
+            Console.WriteLine($"Create the table object {schemaName}.{tableName}");
 
             //
             // Create a new table object
@@ -185,24 +181,21 @@ namespace SmoIntroduction
             tbl.Columns.Add(col);
             col.Nullable = false;
 
-            Console.Write($"Adding the table columns {CNewline}");
+            Console.WriteLine("Adding the table columns");
             // Create the table
             tbl.Create();
 
-            Console.Write($"Create the table on SQL Server {schemaName}.{tableName}{CNewline}");
+            Console.WriteLine($"Create the table on SQL Server {schemaName}.{tableName}");
 
             var sb = new StringBuilder();
 
 
-            Console.Write($"Make T-SQL script to create table {schemaName}.{tableName}{CNewline}");
+            Console.WriteLine($"Make T-SQL script to create table {schemaName}.{tableName}");
 
 
             var coll = tbl.Script(CreateTable.MakeOptions());
             foreach (var str in coll)
-            {
-                sb.Append(str);
-                sb.Append(CNewline);
-            }
+                sb.AppendLine(str);
 
             string fileName = $"{tableName}{DateTime.Now:yyyy_mm_dd_HH_mm_ss}.txt";
             if (File.Exists(fileName))
@@ -211,14 +204,13 @@ namespace SmoIntroduction
             // start notepad and disply the configuration
             Process.Start(fileName);
 
-
             if (cnn.IsOpen)
                 cnn.Disconnect();
             cnn = null;
             db = null;
             server = null;
 
-            Console.Write($"Press any key to exit...{CNewline}");
+            Console.WriteLine("Press any key to exit...");
             Console.ReadLine();
 
         }
