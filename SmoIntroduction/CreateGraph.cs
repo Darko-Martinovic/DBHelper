@@ -48,7 +48,7 @@ namespace SmoIntroduction
             // Only for SQL Server version 2017
             if (server.Version < new Version(CServerVersion))
             {
-                Console.WriteLine("Only for SQL Server 2017 and above");
+                ConsoleEx.WriteLine("Only for SQL Server 2017 and above",ConsoleColor.Cyan);
                 Console.ReadLine();
                 return;
 
@@ -64,14 +64,75 @@ namespace SmoIntroduction
             CreateLivesIn(db);
             CreateLocatedIn(db);
 
-            //Insert data
+
             try
             {
+                InsertData(db);
 
-                Console.WriteLine("Insert data");
+                using (var dataset = db.ExecuteWithResults(
+                    @"-- Find Restaurants that John likes
+SELECT Restaurant.name
+FROM Person, likes, Restaurant
+WHERE MATCH (Person-(likes)->Restaurant)
+AND Person.name = 'John';
+-- Find Restaurants that John's friends like
+SELECT Restaurant.name 
+FROM Person person1, Person person2, likes, friendOf, Restaurant
+WHERE MATCH(person1-(friendOf)->person2-(likes)->Restaurant)
+AND person1.name='John';
 
-                db.ExecuteNonQuery(
-                    @"-- Insert data into node tables. Inserting into a node table is same as inserting into a regular table
+-- Find people who like a restaurant in the same city they live in
+SELECT Person.name
+FROM Person, likes, Restaurant, livesIn, City, locatedIn
+WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->City);
+"))
+                {
+
+                    Console.WriteLine("-----------------------------------------------");
+                    ConsoleEx.WriteLine("Find Restaurants that John likes", ConsoleColor.Cyan);
+                    Console.WriteLine("-----------------------------------------------");
+                    foreach (DataRow r in dataset.Tables[0].Rows)
+                        ConsoleEx.WriteLine("\t" + r[0], ConsoleColor.Yellow);
+                    Console.WriteLine("-----------------------------------------------");
+                    ConsoleEx.WriteLine("Find Restaurants that John's friends like", ConsoleColor.Cyan);
+                    Console.WriteLine("-----------------------------------------------");
+                    foreach (DataRow r in dataset.Tables[1].Rows)
+                        ConsoleEx.WriteLine("\t" + r[0], ConsoleColor.Yellow);
+                    Console.WriteLine("-----------------------------------------------");
+                    ConsoleEx.WriteLine("Find people who like a restaurant in the same city they live in", ConsoleColor.Cyan);
+                    Console.WriteLine("-----------------------------------------------");
+                    foreach (DataRow r in dataset.Tables[2].Rows)
+                        ConsoleEx.WriteLine("\t" + r[0], ConsoleColor.Yellow);
+                    Console.WriteLine("-----------------------------------------------");
+                }
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                    .Select(ex1 => ex1.Message)));
+
+            }
+            finally
+            {
+                if (cnn.IsOpen)
+                    cnn.Disconnect();
+                cnn = null;
+                db = null;
+                server = null;
+            }
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadLine();
+
+
+        }
+
+        private static void InsertData(Database db)
+        {
+//Insert data
+            ConsoleEx.WriteLine("Insert data", ConsoleColor.Yellow);
+            db.ExecuteNonQuery(
+                @"-- Insert data into node tables. Inserting into a node table is same as inserting into a regular table
 INSERT INTO Person VALUES (1,'John');
 INSERT INTO Person VALUES (2,'Mary');
 INSERT INTO Person VALUES (3,'Alice');
@@ -125,64 +186,6 @@ INSERT INTO friendof VALUES ((SELECT $NODE_ID FROM person WHERE ID = 4), (SELECT
 INSERT INTO friendof VALUES ((SELECT $NODE_ID FROM person WHERE ID = 5), (SELECT $NODE_ID FROM person WHERE ID = 4));
 
 ");
-
-                using (var dataset = db.ExecuteWithResults(
-                    @"-- Find Restaurants that John likes
-SELECT Restaurant.name
-FROM Person, likes, Restaurant
-WHERE MATCH (Person-(likes)->Restaurant)
-AND Person.name = 'John';
--- Find Restaurants that John's friends like
-SELECT Restaurant.name 
-FROM Person person1, Person person2, likes, friendOf, Restaurant
-WHERE MATCH(person1-(friendOf)->person2-(likes)->Restaurant)
-AND person1.name='John';
-
--- Find people who like a restaurant in the same city they live in
-SELECT Person.name
-FROM Person, likes, Restaurant, livesIn, City, locatedIn
-WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->City);
-"))
-                {
-
-                    Console.WriteLine("-----------------------------------------------");
-                    Console.WriteLine("Find Restaurants that John likes");
-                    Console.WriteLine("-----------------------------------------------");
-                    foreach (DataRow r in dataset.Tables[0].Rows)
-                        Console.WriteLine("\t" + r[0]);
-                    Console.WriteLine("-----------------------------------------------");
-                    Console.WriteLine("Find Restaurants that John's friends like");
-                    Console.WriteLine("-----------------------------------------------");
-                    foreach (DataRow r in dataset.Tables[1].Rows)
-                        Console.WriteLine("\t" + r[0]);
-                    Console.WriteLine("-----------------------------------------------");
-                    Console.WriteLine("Find people who like a restaurant in the same city they live in");
-                    Console.WriteLine("-----------------------------------------------");
-                    foreach (DataRow r in dataset.Tables[2].Rows)
-                        Console.WriteLine("\t" + r[0]);
-                    Console.WriteLine("-----------------------------------------------");
-                }
-
-            }
-            catch (Exception ex)
-            {
-
-                Console.WriteLine(string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
-                    .Select(ex1 => ex1.Message)));
-
-            }
-            finally
-            {
-                if (cnn.IsOpen)
-                    cnn.Disconnect();
-                cnn = null;
-                db = null;
-                server = null;
-            }
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadLine();
-
-
         }
 
         private static void CreateLocatedIn(Database db)
@@ -190,10 +193,10 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
             const string tableName = "locatedIn";
             const string schemaName = "dbo";
 
-            Console.WriteLine("Droping the table if exists");
+            ConsoleEx.WriteLine("Droping the table if exists", ConsoleColor.Red);
             if (db.Tables.Contains(tableName, schemaName))
                 db.Tables[tableName, schemaName].Drop();
-            Console.WriteLine($"Create the table object {schemaName}.{tableName}");
+            ConsoleEx.WriteLine($"Create the table object {schemaName}.{tableName}", ConsoleColor.Cyan);
 
             //
             // Create a new table object
@@ -214,10 +217,10 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
             const string tableName = "livesIn";
             const string schemaName = "dbo";
 
-            Console.WriteLine("Droping the table if exists");
+            ConsoleEx.WriteLine("Droping the table if exists",ConsoleColor.Red);
             if (db.Tables.Contains(tableName, schemaName))
                 db.Tables[tableName, schemaName].Drop();
-            Console.WriteLine($"Create the table object {schemaName}.{tableName}");
+            ConsoleEx.WriteLine($"Create the table object {schemaName}.{tableName}", ConsoleColor.Cyan);
 
             //
             // Create a new table object
@@ -238,10 +241,10 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
             const string tableName = "friendOf";
             const string schemaName = "dbo";
 
-            Console.WriteLine("Droping the table if exists");
+            ConsoleEx.WriteLine("Droping the table if exists",ConsoleColor.Red);
             if (db.Tables.Contains(tableName, schemaName))
                 db.Tables[tableName, schemaName].Drop();
-            Console.WriteLine($"Create the table object {schemaName}.{tableName}");
+            ConsoleEx.WriteLine($"Create the table object {schemaName}.{tableName}",ConsoleColor.Cyan);
 
             //
             // Create a new table object
@@ -261,10 +264,10 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
             const string tableName = "likes";
             const string schemaName = "dbo";
 
-            Console.WriteLine("Droping the table if exists");
+            ConsoleEx.WriteLine("Droping the table if exists",ConsoleColor.Red);
             if (db.Tables.Contains(tableName, schemaName))
                 db.Tables[tableName, schemaName].Drop();
-            Console.WriteLine($"Create the table object {schemaName}.{tableName}");
+            ConsoleEx.WriteLine($"Create the table object {schemaName}.{tableName}", ConsoleColor.Cyan);
 
             //
             // Create a new table object
@@ -290,10 +293,10 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
             const string tableName = "City";
             const string schemaName = "dbo";
 
-            Console.WriteLine("Droping the table if exists");
+            ConsoleEx.WriteLine("Droping the table if exists",ConsoleColor.Red);
             if (db.Tables.Contains(tableName, schemaName))
                 db.Tables[tableName, schemaName].Drop();
-            Console.WriteLine($"Create the table object {schemaName}.{tableName}");
+            ConsoleEx.WriteLine($"Create the table object {schemaName}.{tableName}", ConsoleColor.Cyan);
 
             //
             // Create a new table object
@@ -342,12 +345,12 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
             const string tableName = "Restaurant";
             const string schemaName = "dbo";
 
-            Console.WriteLine("Droping the table if exists");
+            ConsoleEx.WriteLine("Droping the table if exists",ConsoleColor.Red);
             if (db.Tables.Contains(tableName, schemaName))
                 db.Tables[tableName, schemaName].Drop();
 
 
-            Console.WriteLine($"Create the table object {schemaName}.{tableName}");
+            ConsoleEx.WriteLine($"Create the table object {schemaName}.{tableName}", ConsoleColor.Cyan);
 
             //
             // Create a new table object
@@ -396,10 +399,11 @@ WHERE MATCH (Person-(likes)->Restaurant-(locatedIn)->City AND Person-(livesIn)->
             const string tableName = "Person";
             const string schemaName = "dbo";
 
-            Console.WriteLine("Droping the table if exists");
+            ConsoleEx.WriteLine("Droping the table if exists", ConsoleColor.Red);
             if (db.Tables.Contains(tableName, schemaName))
                 db.Tables[tableName, schemaName].Drop();
-            Console.WriteLine($"Create the table object {schemaName}.{tableName}");
+
+            ConsoleEx.WriteLine($"Create the table object {schemaName}.{tableName}",ConsoleColor.Cyan);
 
             //
             // Create a new table object
