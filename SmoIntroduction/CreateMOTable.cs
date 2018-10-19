@@ -52,7 +52,7 @@ namespace SmoIntroduction
                 // Add MEMORY OPTIMIZED FILE GROUP AND FILE 
                 if (server.Version >= new Version(CServerVersion))
                 {
-                    Console.WriteLine("Add support for memory optimized tables");
+                    ConsoleEx.WriteLine("Add support for memory optimized tables", ConsoleColor.Cyan);
                     // First check if there is already memory optimized file group 
                     var isMemoryOptimizedFileGropuExists = false;
 
@@ -91,7 +91,7 @@ namespace SmoIntroduction
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine(ex.Message);
+                                ConsoleEx.WriteLine(ex.Message, ConsoleColor.Red);
                                 Console.WriteLine("Press any key to exit...");
                                 Console.ReadLine();
                                 return;
@@ -115,7 +115,7 @@ namespace SmoIntroduction
                     db.Schemas[schemaName].Create();
                 }
 
-                Console.WriteLine("Create the schema object - if not exists");
+                ConsoleEx.WriteLine("Create the schema object - if not exists", ConsoleColor.Cyan);
 
                 //
                 //Drop the table if exists
@@ -123,10 +123,10 @@ namespace SmoIntroduction
                 var tableName = ConfigurationManager.AppSettings["C_MO_TEST_TABLE"];
                 if (db.Tables.Contains(tableName, schemaName))
                     db.Tables[tableName, schemaName].Drop();
-                Console.WriteLine("Droping the table if exists");
+                ConsoleEx.WriteLine("Droping the table if exists",ConsoleColor.Red);
 
 
-                Console.WriteLine($"Create the table object {schemaName}.{tableName}");
+                ConsoleEx.WriteLine($"Create the table object {schemaName}.{tableName}", ConsoleColor.Cyan);
 
                 //
                 // Create a new table object
@@ -186,16 +186,16 @@ namespace SmoIntroduction
                 tbl.Columns.Add(col);
                 col.Nullable = false;
 
-                Console.WriteLine("Adding the table columns");
+                ConsoleEx.WriteLine("Adding the table columns", ConsoleColor.DarkGray);
                 // Create the table
                 tbl.Create();
 
-                Console.WriteLine($"Create the table on SQL Server {schemaName}.{tableName}");
+                ConsoleEx.WriteLine($"Create the table on SQL Server {schemaName}.{tableName}", ConsoleColor.Cyan);
 
                 var sb = new StringBuilder();
 
 
-                Console.WriteLine($"Make T-SQL script to create table {schemaName}.{tableName}");
+                ConsoleEx.WriteLine($"Make T-SQL script to create table {schemaName}.{tableName}", ConsoleColor.Yellow);
 
 
                 var coll = tbl.Script(CreateTable.MakeOptions());

@@ -45,7 +45,7 @@ namespace SmoIntroduction
                 db.Create();
 
                 // Adding four file groups and corespodenting files
-                Console.WriteLine("Adding four file groups");
+                ConsoleEx.WriteLine("Adding four file groups", ConsoleColor.Cyan );
                 for (var i = 1; i < 5; i++)
                 {
                     db.FileGroups.Add(new FileGroup(db, $"test{i}fg"));
@@ -57,7 +57,7 @@ namespace SmoIntroduction
 
 
 
-                Console.WriteLine("Creating the partition function");
+                ConsoleEx.WriteLine("Creating the partition function", ConsoleColor.Yellow);
                 //Create the partition function
                 var partitionFunction = new PartitionFunction(db, "myRangePF1");
 
@@ -71,7 +71,7 @@ namespace SmoIntroduction
                 // Partition  1        |  2                        |  3                          |   4
                 // Values     col1 <= 1|  col1 > 1 AND col1 <= 100 |  col1 > 100 AND col1 <= 1000|   col1 > 1000
 
-                Console.WriteLine("Creating the partition scheme");
+                ConsoleEx.WriteLine("Creating the partition scheme", ConsoleColor.Red);
                 var partitionScheme = new PartitionScheme(db, "myRangePS1") { PartitionFunction = "myRangePF1" };
                 for (var i = 1; i < 5; i++)
                     partitionScheme.FileGroups.Add($"test{i}fg");
@@ -79,7 +79,7 @@ namespace SmoIntroduction
                 partitionScheme.Create();
 
 
-                Console.WriteLine("Creating the table");
+                ConsoleEx.WriteLine("Creating the table", ConsoleColor.Cyan);
                 var table = new Table(db, "TestTable");
                 table.Columns.Add(new Column(table, "col1", DataType.Int));
                 table.PartitionScheme = "myRangePS1";
@@ -99,7 +99,7 @@ namespace SmoIntroduction
 
                 foreach (DataRow row in dataset.Tables[0].Rows)
                 {
-                    Console.WriteLine($"Partition {row["partition_number"]} has {row["row_count"]} rows");
+                    ConsoleEx.WriteLine($"Partition {row["partition_number"]} has {row["row_count"]} rows", ConsoleColor.Magenta);
                 }
                 db = null;
             }
