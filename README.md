@@ -45,5 +45,6 @@ ExtProperties                     | Shows how to manipulate with extended proper
 RebuildIndexes                    | Shows how to rebuild indexes and update statistics
 ServerConfiguration               | Shows how to get the server configuration
 ServerEvents                      | Shows how to subsribe to server events
+SetDefaultInitField               | Shows how to reduce the amount of T-SQL needed for object initialisation
 TDE                               | Shows how to encrypt the database
 
