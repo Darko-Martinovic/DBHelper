@@ -10,7 +10,7 @@ namespace Tester
 {
 
 
-public class Program
+internal class Program
     {
 
 
@@ -28,54 +28,54 @@ public class Program
             //-------------------------------------------------------------
             // Is the database ONLINE
             //-------------------------------------------------------------
-            Console.WriteLine(DbGeneral.IsTheDataBaseOnLine(cnn, logger, ref errorMessage)
+            ConsoleEx.WriteLine(DbGeneral.IsTheDataBaseOnLine(cnn, logger, ref errorMessage)
                 ? "The task of determining the database state finished successfully!"
-                : $"The task of determining the database state failed with following error message :{errorMessage}");
+                : $"The task of determining the database state failed with following error message :{errorMessage}", ConsoleColor.Cyan);
 
 
-            Console.WriteLine("..............................................................................................");
+            ConsoleEx.WriteLine(" ".PadRight(80,'-'), ConsoleColor.Cyan);
 
             //-------------------------------------------------------------
             // Put the database in Restricted UserAccess Mode
             //-------------------------------------------------------------
-            Console.WriteLine(
+            ConsoleEx.WriteLine(
                 DbGeneral.PutDbInUserMode(cnn, DatabaseUserAccess.Restricted, true, logger, ref errorMessage)
                     ? "The task of putting the database in restricted user access mode finished successfully!"
-                    : $"The task of putting the database in restricted user access mode failed with following error message :{errorMessage}");
+                    : $"The task of putting the database in restricted user access mode failed with following error message :{errorMessage}", ConsoleColor.Cyan);
 
-            Console.WriteLine("..............................................................................................");
+            ConsoleEx.WriteLine("..............................................................................................", ConsoleColor.Yellow);
 
             //-------------------------------------------------------------
             // Put the database in Multiple UserAccess Mode
             //-------------------------------------------------------------
-            Console.WriteLine(
+            ConsoleEx.WriteLine(
                 DbGeneral.PutDbInUserMode(cnn, DatabaseUserAccess.Multiple, true, logger, ref errorMessage)
                     ? "The task of putting the database in multiple user access mode finished successfully!"
-                    : $"The task of putting the database in multiple user access mode failed with following error message :{errorMessage}");
+                    : $"The task of putting the database in multiple user access mode failed with following error message :{errorMessage}", ConsoleColor.Cyan);
 
-            Console.WriteLine("..............................................................................................");
+            ConsoleEx.WriteLine(" ".PadRight(80,'-'), ConsoleColor.Cyan);
 
             //-------------------------------------------------------------
             // Test Backup
             //-------------------------------------------------------------
 
-            Console.WriteLine(DbGeneral.BackupDatabase(cnn, logger, ref errorMessage, true)
+            ConsoleEx.WriteLine(DbGeneral.BackupDatabase(cnn, logger, ref errorMessage)
                 ? "The task of backup the database finsihed successfully!"
-                : $"The task of backup the database failed with following error message : {errorMessage}");
+                : $"The task of backup the database failed with following error message : {errorMessage}", ConsoleColor.Cyan);
 
-            Console.WriteLine("..............................................................................................");
+            ConsoleEx.WriteLine(" ".PadRight(80,'-'), ConsoleColor.Cyan);
 
 
 
             //-------------------------------------------------------------
             // Test restore
             //-------------------------------------------------------------
-            Console.WriteLine(DbGeneral.RestoreDatabase(cnn, logger, ref errorMessage)
+            ConsoleEx.WriteLine(DbGeneral.RestoreDatabase(cnn, logger, ref errorMessage)
                 ? "The task of restore the database finsihed successfully!"
-                : $"The task of restore the database failed with following error message : {errorMessage}");
+                : $"The task of restore the database failed with following error message : {errorMessage}", ConsoleColor.Cyan);
 
 
-            Console.WriteLine("..............................................................................................");
+            ConsoleEx.WriteLine(" ".PadRight(80,'-'), ConsoleColor.Cyan);
 
 
 
@@ -91,7 +91,7 @@ public class Program
                 Console.WriteLine("There is no backup file!");
 
 
-            Console.WriteLine("..............................................................................................");
+            ConsoleEx.WriteLine(" ".PadRight(80,'-'), ConsoleColor.Cyan);
 
 
             //Frist be sure that you published SQLCLR project, then uncomment following lines
@@ -102,14 +102,14 @@ public class Program
             ////-------------------------------------------------------------
             var numberOfBackupFiles = 0;
             long totalSizeOfBackupFiles = 0;
-            Console.WriteLine(
+            ConsoleEx.WriteLine(
                 DbGeneral.DetermineNumberOfBackupFiles(cnn, logger, ref numberOfBackupFiles, ref totalSizeOfBackupFiles,
                     ref errorMessage)
                     ? "The task of determining how many backup files are taken finished successfully!"
-                    : $"The task of determining how many backup files are taken  failed with following error message :{errorMessage}");
+                    : $"The task of determining how many backup files are taken  failed with following error message :{errorMessage}", ConsoleColor.Cyan);
 
 
-            Console.WriteLine("..............................................................................................");
+            ConsoleEx.WriteLine(" ".PadRight(80,'-'), ConsoleColor.Cyan);
 
 
 
@@ -117,23 +117,23 @@ public class Program
             ////-------------------------------------------------------------
             //// Delete old backup files
             ////-------------------------------------------------------------
-            Console.WriteLine(DbGeneral.DeleteBackupFiles(cnn, logger, ref errorMessage)
+            ConsoleEx.WriteLine(DbGeneral.DeleteBackupFiles(cnn, logger, ref errorMessage)
                 ? "The task of deleting old backup files finished successfully!"
-                : $"The task of deleting old backup files failed with following error message :{errorMessage}");
+                : $"The task of deleting old backup files failed with following error message :{errorMessage}", ConsoleColor.Cyan);
 
-            Console.WriteLine("..............................................................................................");
+            ConsoleEx.WriteLine(" ".PadRight(80,'-'), ConsoleColor.Cyan);
 
 
 
             ////-------------------------------------------------------------
             //// Determine free disk space
             ////-------------------------------------------------------------
-            Console.WriteLine(DbGeneral.CanIPerformABackup(cnn, logger, ref errorMessage)
+            ConsoleEx.WriteLine(DbGeneral.CanIPerformABackup(cnn, logger, ref errorMessage)
                 ? "The task of determining free disk space finished successfully!"
-                : $"The task of determining free disk space failed with following error message :{errorMessage}");
+                : $"The task of determining free disk space failed with following error message :{errorMessage}", ConsoleColor.Cyan);
 
 
-            Console.WriteLine("..............................................................................................");
+            ConsoleEx.WriteLine(" ".PadRight(80,'-'), ConsoleColor.Cyan);
 
 
 
@@ -143,23 +143,23 @@ public class Program
             //-------------------------------------------------------------
 
 
-            Console.WriteLine(DbGeneral.ForceShrinkingLog(cnn, 256, true, logger, ref errorMessage)
+            ConsoleEx.WriteLine(DbGeneral.ForceShrinkingLog(cnn, 256, logger, ref errorMessage)
                 ? "The task of shrinking log finished successfully!"
-                : $"The task of shrinking log failed with following error message :{errorMessage}");
+                : $"The task of shrinking log failed with following error message :{errorMessage}", ConsoleColor.Cyan);
 
 
-            Console.WriteLine("..............................................................................................");
+            ConsoleEx.WriteLine(" ".PadRight(80,'-'), ConsoleColor.Cyan);
 
 
 
             //-------------------------------------------------------------
             // Test CheckDb
             //-------------------------------------------------------------
-            Console.WriteLine(DbGeneral.CheckDb(cnn, logger, ref errorMessage)
+            ConsoleEx.WriteLine(DbGeneral.CheckDb(cnn, logger, ref errorMessage)
                 ? "The task of checking the database finsihed successfully!"
-                : $"The task of checking the database failed with following error message: {errorMessage}");
+                : $"The task of checking the database failed with following error message: {errorMessage}", ConsoleColor.Cyan);
 
-            Console.WriteLine("..............................................................................................");
+            ConsoleEx.WriteLine(" ".PadRight(80,'-'), ConsoleColor.Cyan);
 
 
 

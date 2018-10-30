@@ -5,6 +5,9 @@ using System.Diagnostics;
 using System.Data;
 using Converter.Extension;
 using System.Linq;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedVariable
+// ReSharper disable UnusedMember.Global
 
 namespace DBHelper
 {
@@ -20,7 +23,7 @@ namespace DBHelper
 
     public static class DbGeneral
     {
-        public const string LastBackup = "LastBackup";
+        private const string LastBackup = "LastBackup";
 
         #region  Backup rutine 
 
@@ -98,19 +101,19 @@ namespace DBHelper
 
 
 
-                source.PercentComplete += (object sender, PercentCompleteEventArgs e) =>
+                source.PercentComplete += (sender, e) =>
                 {
                     if (isLogging)
-                        logger.Log($"\tDoing backup : {e.Percent.ToString().Trim()}%");
+                        logger?.Log($"\tDoing backup : {e.Percent.ToString().Trim()}%");
                 };
 
-                source.Complete += (object sender, ServerMessageEventArgs e) =>
+                source.Complete += (sender,  e) =>
                 {
                     if (isLogging)
                     {
-                        logger.Log(@".............................................................................................." );
-                        logger.Log(e.Error.Message);
-                        logger.Log(@".............................................................................................." );
+                        logger?.Log(@".............................................................................................." );
+                        logger?.Log(e.Error.Message);
+                        logger?.Log(@".............................................................................................." );
                     }
                 };
 
@@ -632,22 +635,22 @@ namespace DBHelper
                     RestrictedUser = true
                 };
 
-                destination.PercentComplete += (object sender, PercentCompleteEventArgs e) =>
+                destination.PercentComplete += (sender, e) =>
                 {
                     if (isLogging)
                     {
-                        logger.Log($"\tRestoring : {e.Percent.ToString().Trim()}%");
+                        logger?.Log($"\tRestoring : {e.Percent.ToString().Trim()}%");
                     }
 
                 };
 
-                destination.Complete += (object sender, ServerMessageEventArgs e) =>
+                destination.Complete += (sender, e) =>
                 {
                     if (isLogging)
                     {
-                        logger.Log(".............................................................................................." );
-                        logger.Log(e.Error.Message );
-                        logger.Log(".............................................................................................." );
+                        logger?.Log(".............................................................................................." );
+                        logger?.Log(e.Error.Message );
+                        logger?.Log(".............................................................................................." );
                     }
                 };
 
@@ -681,10 +684,10 @@ namespace DBHelper
                 db1.Alter(TerminationClause.RollbackTransactionsImmediately);
                 if (db1.ExtendedProperties[LastBackup] == null)
                 {
-                    ExtendedProperty extProperty = new ExtendedProperty();
-                    extProperty.Parent = db1;
-                    extProperty.Name = LastBackup;
-                    extProperty.Value = backupFileName;
+                    var extProperty = new ExtendedProperty
+                    {
+                        Parent = db1, Name = LastBackup, Value = backupFileName
+                    };
                     extProperty.Create();
                 }
                 else
@@ -829,19 +832,18 @@ namespace DBHelper
         /// </summary>
         /// <param name="cnn">connection to the server instance</param>
         /// <param name="targetLogSizeInMb">target log size in MB</param>
-        /// <param name="killUserProcess">do we kill user process before</param>
         /// <param name="logger"></param>
         /// <param name="errorMessage">capture the error message</param>
         /// <returns></returns>
-        public static bool ForceShrinkingLog(ServerConnection cnn, int targetLogSizeInMb, bool killUserProcess, ILog logger,  ref string errorMessage)
+        public static bool ForceShrinkingLog(ServerConnection cnn, int targetLogSizeInMb, ILog logger,  ref string errorMessage)
         {
 
-            bool retValue = true;
+            var retValue = true;
             Server server = null;
-            bool isLogging = logger != null;
+            var isLogging = logger != null;
             Database db = null;
-            bool changeMode = false;
-            string dataBaseName = cnn.DatabaseName;
+            var changeMode = false;
+            var dataBaseName = cnn.DatabaseName;
             errorMessage = string.Empty;
             try
             {
@@ -858,7 +860,7 @@ namespace DBHelper
                         throw new Exception("I'm not able to put database in the simple recovery mode");
                     }
                   
-                    if (BackupDatabase( cnn, logger, ref errorMessage,true) == false)
+                    if (BackupDatabase( cnn, logger, ref errorMessage) == false)
                     {
                         throw new Exception("I'm not able to perform the database backup!");
                     }
@@ -874,8 +876,7 @@ namespace DBHelper
                     {
                         throw new Exception("I'm not able to put the database in full recovery mode");
                     }
-                    var backupFileName = string.Empty;
-                    if (BackupDatabase(cnn, logger,  ref errorMessage, true) == false)
+                    if (BackupDatabase(cnn, logger,  ref errorMessage) == false)
                     {
                         throw new Exception("I'm not able to perform backup!");
                     }
@@ -949,16 +950,16 @@ namespace DBHelper
 
                 if (db.Status == DatabaseStatus.Normal)
                 {
-                    logger.Log("..............................................................................................");
-                    logger.Log($"The database \"{dataBaseName}\" is ONLINE!");
-                    logger.Log("..............................................................................................");
+                    logger?.Log("..............................................................................................");
+                    logger?.Log($"The database \"{dataBaseName}\" is ONLINE!");
+                    logger?.Log("..............................................................................................");
                 }
                 else
                 {
                     retValue = false;
-                    logger.Log("..............................................................................................");
-                    logger.Log($"The database \"{dataBaseName}\" is NOT ONLINE");
-                    logger.Log("..............................................................................................");
+                    logger?.Log("..............................................................................................");
+                    logger?.Log($"The database \"{dataBaseName}\" is NOT ONLINE");
+                    logger?.Log("..............................................................................................");
                 }
             }
             catch (Exception ex)
@@ -1196,8 +1197,7 @@ namespace DBHelper
                             $"I have been deleted in directory : {backupDirectory} files with following pattern {filter}");
                         logger.Log("..............................................................................................");
                     }
-                    if (db.ExtendedProperties[LastBackup] != null)
-                        db.ExtendedProperties[LastBackup].Drop();
+                    db.ExtendedProperties[LastBackup]?.Drop();
 
                     retValue = true;
                 }
