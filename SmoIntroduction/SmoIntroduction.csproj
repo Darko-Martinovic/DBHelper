@@ -42,7 +42,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>SmoIntroduction.CreatePartitionScheme</StartupObject>
+    <StartupObject>SmoIntroduction.SetDefaultInitField</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.SqlServer.AzureStorageEnum, Version=14.100.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
@@ -153,6 +153,7 @@
     <Compile Include="RebuildIndexes.cs" />
     <Compile Include="ServerConfiguration.cs" />
     <Compile Include="ServerEvents.cs" />
+    <Compile Include="SetDefaultInitField.cs" />
     <Compile Include="Tde.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -11,7 +11,7 @@ namespace SmoIntroduction
 {
 
 
-    public class CreateTable
+    internal static class CreateTable
     {
 
         private const string CNewline = "\r\n";
