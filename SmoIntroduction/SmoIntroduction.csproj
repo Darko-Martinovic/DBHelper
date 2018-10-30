@@ -42,7 +42,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>SmoIntroduction.SetDefaultInitField</StartupObject>
+    <StartupObject>SmoIntroduction.CreateStoredProc</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.SqlServer.AzureStorageEnum, Version=14.100.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
@@ -146,8 +146,10 @@
     <Compile Include="CreateGraph.cs" />
     <Compile Include="CreateMOTable.cs" />
     <Compile Include="CreatePartitionScheme.cs" />
+    <Compile Include="CreateStoredProc.cs" />
     <Compile Include="CreateTable.cs" />
     <Compile Include="Extension\ConsoleEx.cs" />
+    <Compile Include="Extension\StringExtension.cs" />
     <Compile Include="ExtProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RebuildIndexes.cs" />

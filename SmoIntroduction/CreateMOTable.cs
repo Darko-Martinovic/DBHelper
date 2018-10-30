@@ -28,7 +28,7 @@ namespace SmoIntroduction
             var connectionString = ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString;
             ServerConnection cnn;
             string databaseName;
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            using (var sqlConnection = new SqlConnection(connectionString))
             {
                 cnn = new ServerConnection(sqlConnection);
                 // Read the database name from app.config
