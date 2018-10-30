@@ -41,6 +41,7 @@ CreateGraph                       | Shows how to create NODE & EDGE tables
 CreateMOTable                     | Shows how to create the memory optimized tables
 CreatePartitionScheme             | Shows how to create the partition scheme and the partition function
 CreateTable                       | Shows how to create traditional - disk based tables
+CreateStoredProc                  | Shows how to create the stored procedure
 ExtProperties                     | Shows how to manipulate with extended properties
 RebuildIndexes                    | Shows how to rebuild indexes and update statistics
 ServerConfiguration               | Shows how to get the server configuration
