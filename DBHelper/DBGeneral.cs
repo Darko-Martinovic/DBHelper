@@ -340,6 +340,7 @@ namespace DBHelper
                     KillAllProcessesForOneDatabase(cnn, ref errorMessage);
                 }
                 // execute Alter 
+
                 db.Alter(TerminationClause.RollbackTransactionsImmediately);
                 // after that Refresh is needed
                 db.Refresh();
