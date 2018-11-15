@@ -3,7 +3,7 @@ using System.IO;
 
 namespace IOHelper
 {
-    static public class DriveHelper
+    public static class DriveHelper
     {
         public enum DiskSizeUnit
         {
@@ -17,13 +17,11 @@ namespace IOHelper
         public static double FreeSpace(string driveLetter, DiskSizeUnit sizeUnit = DiskSizeUnit.MegaBytes)
         {
             double whatIsFreeSpace = -1;
-            double dividedBy= 1;
-            DriveInfo driveInfo = new DriveInfo(driveLetter);
+            var driveInfo = new DriveInfo(driveLetter);
 
-            if (driveInfo != null)
             {
-                long freeSpaceNative = driveInfo.AvailableFreeSpace;
-                dividedBy = Math.Pow(1024, (int)sizeUnit);
+                var freeSpaceNative = driveInfo.AvailableFreeSpace;
+                var dividedBy= Math.Pow(1024, (int)sizeUnit);
 
                 whatIsFreeSpace = freeSpaceNative / dividedBy;
             }

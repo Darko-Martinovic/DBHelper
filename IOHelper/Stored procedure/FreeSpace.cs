@@ -9,7 +9,8 @@ public partial class StoredProcedures
     public static void FreeSpace
     (
         [SqlFacet(MaxSize = 1)] SqlString driveLetter,
-        [SqlFacet(IsNullable = true, MaxSize = 4)]SqlInt16 unitOfMeasure,
+        [SqlFacet(IsNullable = true, MaxSize = 4)]
+        SqlInt16 unitOfMeasure,
         ref SqlDouble freeSpace,
         ref SqlString errorMessage
     )

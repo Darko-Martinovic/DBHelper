@@ -9,7 +9,8 @@ public partial class StoredProcedures
     public static void DeleteFiles
     (
         [SqlFacet(MaxSize = 1000)] SqlString path,
-        [SqlFacet(MaxSize = 1000, IsNullable = true)] SqlString filter,
+        [SqlFacet(MaxSize = 1000, IsNullable = true)]
+        SqlString filter,
         ref SqlString errorMessage
     )
     {
