@@ -5,7 +5,7 @@ using System.IO;
 
 public partial class StoredProcedures
 {
-    [Microsoft.SqlServer.Server.SqlProcedure]
+    [SqlProcedure]
     public static void DeleteFiles
     (
         [SqlFacet(MaxSize = 1000)] SqlString path,

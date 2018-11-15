@@ -5,7 +5,7 @@ using static IOHelper.DriveHelper;
 
 public partial class StoredProcedures
 {
-    [Microsoft.SqlServer.Server.SqlProcedure]
+    [SqlProcedure]
     public static void FreeSpace
     (
         [SqlFacet(MaxSize = 1)] SqlString driveLetter,
