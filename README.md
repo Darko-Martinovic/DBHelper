@@ -42,7 +42,6 @@ CreateMOTable                     | Shows how to create the memory optimized tab
 CreatePartitionScheme             | Shows how to create the partition scheme and the partition function
 CreateStoredProc                  | Shows how to create the stored procedure
 CreateTable                       | Shows how to create traditional - disk based tables
-CreateStoredProc                  | Shows how to create the stored procedure
 ExtProperties                     | Shows how to manipulate with extended properties
 RebuildIndexes                    | Shows how to rebuild indexes and update statistics
 ServerConfiguration               | Shows how to get the server configuration
