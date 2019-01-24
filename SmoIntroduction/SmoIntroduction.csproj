@@ -151,6 +151,7 @@
     <Compile Include="CreatePartitionScheme.cs" />
     <Compile Include="CreateStoredProc.cs" />
     <Compile Include="CreateTable.cs" />
+    <Compile Include="ExtendedEvents.cs" />
     <Compile Include="Extension\ConsoleEx.cs" />
     <Compile Include="Extension\StringExtension.cs" />
     <Compile Include="ExtProperties.cs" />
