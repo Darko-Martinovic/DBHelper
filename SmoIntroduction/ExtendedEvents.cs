@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Configuration;
 using System.Data.SqlClient;
-using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Sdk.Sfc;
-using Microsoft.SqlServer.Management.Smo;
 using Microsoft.SqlServer.Management.XEvent;
-using Microsoft.SqlServer.Management.XEventDbScoped;
 
 
 namespace SmoIntroduction
@@ -15,35 +12,18 @@ namespace SmoIntroduction
     static class ExtendedEventsDemo
     {
 
-        private static Server _server;
-
-        private static string _dbName = "ExtendedEventsDemo";
 
         static void Main()
         {
 
             var connectionString = ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString;
-            ServerConnection cnn;
-            using (var sqlConnection = new SqlConnection(connectionString))
-            {
-                cnn = new ServerConnection(sqlConnection);
-            }
 
-            cnn.Connect();
-
-            Console.WriteLine("Connected");
-            _server = new Server(cnn);
-            Console.WriteLine("Create the server object");
-            // Drop the database if exists
-            if (_server.Databases[_dbName] != null)
-                _server.Databases[_dbName].Drop();
-
-            //Create the database
-            var db = new Database(_server, _dbName);
-            db.Create();
-
-            //
             var c = new SqlStoreConnection(new SqlConnection(connectionString));
+
+
+            Console.WriteLine("Crreate the Session object");
+            Console.WriteLine("The most important properties are : the session name and the parent");
+
             var x = new Session()
             {
                 
@@ -58,35 +38,43 @@ namespace SmoIntroduction
                 Name =  "SmoSession"
             };
 
+            Console.WriteLine("Create the target. Be sure that C:\\TMP exists on your computer!");
+
             var t = new Target(x, "package0.event_file");
+
+            //--== Specify target fields 
+
             var tf = t.TargetFields["fileName"];
             tf.Value = @"C:\Tmp\YourSession_Target.xel";
             tf = t.TargetFields["max_file_size"];
             tf.Value = 2;
             tf = t.TargetFields["max_rollover_files"];
             tf.Value = 2;
-
-
             x.Targets.Add(t);
 
+
+            Console.WriteLine("Create the event");
             var e = new Event(x, "sqlserver.sql_statement_completed");
 
-            //var ef = new EventField {Parent = e, Name = "[sqlserver].[like_i_sql_unicode_string]([sqlserver].[sql_text]", Value = "%SELECT%HAVING%"};
-            //e.EventFields.Add(ef);
 
+            Console.WriteLine("Create the Action");
             var a = new Microsoft.SqlServer.Management.XEvent.Action(e, "sqlserver.sql_text");
 
-
+            Console.WriteLine("Predicate expression");
+            e.PredicateExpression = "( [sqlserver].[like_i_sql_unicode_string]([sqlserver].[sql_text], N'%SELECT%HAVING%') )";
 
 
             e.Actions.Add(a);
             x.Events.Add(e);
 
+            Console.WriteLine("Create the Session");
             x.Create();
+            Console.WriteLine("Start the Session");
             x.Start();
+            Console.WriteLine("Press any key to exit ...");
+            Console.ReadLine();
 
 
-            
 
 
         }
