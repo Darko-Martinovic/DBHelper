@@ -12,7 +12,7 @@ namespace SmoIntroduction
     static class ExtendedEventsDemo
     {
 
-
+        private const  string  SessionName = "SmoSession";
         static void Main()
         {
 
@@ -23,6 +23,8 @@ namespace SmoIntroduction
 
             Console.WriteLine("Crreate the Session object");
             Console.WriteLine("The most important properties are : the session name and the parent");
+            var se = new XEStore(c);
+            se.Sessions[SessionName]?.Drop();
 
             var x = new Session()
             {
@@ -35,7 +37,7 @@ namespace SmoIntroduction
                 MemoryPartitionMode = Session.MemoryPartitionModeEnum.None,
                 TrackCausality = false,
                 AutoStart = false,
-                Name =  "SmoSession"
+                Name = SessionName
             };
 
             Console.WriteLine("Create the target. Be sure that C:\\TMP exists on your computer!");
