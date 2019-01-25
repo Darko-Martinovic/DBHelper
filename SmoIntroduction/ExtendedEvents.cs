@@ -2,15 +2,17 @@
 using System.Configuration;
 using System.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
+using Microsoft.SqlServer.Management.Sdk.Sfc;
 using Microsoft.SqlServer.Management.Smo;
 using Microsoft.SqlServer.Management.XEvent;
+using Microsoft.SqlServer.Management.XEventDbScoped;
 
 
 namespace SmoIntroduction
 {
     // based on Microsoft's https://docs.microsoft.com/en-us/sql/relational-databases/extended-events/quick-start-extended-events-in-sql-server?view=sql-server-2017
 
-    class ExtendedEventsDemo
+    static class ExtendedEventsDemo
     {
 
         private static Server _server;
@@ -41,26 +43,44 @@ namespace SmoIntroduction
             db.Create();
 
             //
-            var x = new Session
+            var c = new SqlStoreConnection(new SqlConnection(connectionString));
+            var x = new Session()
             {
+                
+                Parent = new XEStore(c),
                 MaxMemory = 2048,
                 EventRetentionMode = Session.EventRetentionModeEnum.AllowMultipleEventLoss,
                 MaxDispatchLatency =  3,
                 MaxEventSize = 0,
                 MemoryPartitionMode = Session.MemoryPartitionModeEnum.None,
                 TrackCausality = false,
-                AutoStart = false
+                AutoStart = false,
+                Name =  "SmoSession"
             };
-            var t = new Target();
-            t.Parent = x;
 
-            //var ti = new TargetInfo();
-            
+            var t = new Target(x, "package0.event_file");
+            var tf = t.TargetFields["fileName"];
+            tf.Value = @"C:\Tmp\YourSession_Target.xel";
+            tf = t.TargetFields["max_file_size"];
+            tf.Value = 2;
+            tf = t.TargetFields["max_rollover_files"];
+            tf.Value = 2;
+
 
             x.Targets.Add(t);
 
-           var e = new Event();
-           x.Events.Add(e);
+            var e = new Event(x, "sqlserver.sql_statement_completed");
+
+            //var ef = new EventField {Parent = e, Name = "[sqlserver].[like_i_sql_unicode_string]([sqlserver].[sql_text]", Value = "%SELECT%HAVING%"};
+            //e.EventFields.Add(ef);
+
+            var a = new Microsoft.SqlServer.Management.XEvent.Action(e, "sqlserver.sql_text");
+
+
+
+
+            e.Actions.Add(a);
+            x.Events.Add(e);
 
             x.Create();
             x.Start();
