@@ -43,6 +43,7 @@ CreatePartitionScheme             | Shows how to create the partition scheme and
 CreateStoredProc                  | Shows how to create the stored procedure
 CreateTable                       | Shows how to create traditional - disk based tables
 ExtProperties                     | Shows how to manipulate with extended properties
+ExtendedEvents                    | Shows how to manipulate with extended events ( create session, add targets, add events )
 RebuildIndexes                    | Shows how to rebuild indexes and update statistics
 ServerConfiguration               | Shows how to get the server configuration
 ServerEvents                      | Shows how to subsribe to server events
