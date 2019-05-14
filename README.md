@@ -6,6 +6,8 @@ SMO library which has, as a result, a DLL. In the library, you can find a lot of
 
 Method description                               | Method signature
 -------------------------------------------------|---------------------------------------------------------------------------------
+To ensure a backup certificate exists            | EnsureBackupCertificateExists(ServerConnection,Ilog,ref string,string)
+To create a backup certificate                   | CreateBackupCertificate(ServerConnection,ILog,string,string,ref string, bool)
 To take a copy only backup                       | BackupDatabase(ServerConnection,ILog,ref string, bool)
 To perform database check                        | CheckDb(ServerConnection, ILog , ref string )
 To put database in user access mode              | PutDbInUserMode(ServerConnection, DatabaseUserAccess ,bool, ILog, ref string)
