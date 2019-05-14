@@ -12,7 +12,8 @@ namespace Tester
 
 internal class Program
     {
-
+        public static string _certName = @"TestSQLServerCert";
+        public static string _password = @"*rt@40(FL&dasl1";
 
         static void Main(string[] args)
         {
@@ -24,6 +25,11 @@ internal class Program
             var sqlConnection = new SqlConnection(connectionString);
             var cnn = new ServerConnection(sqlConnection);
             ILog logger = new Logger();
+
+
+
+
+
 
             //-------------------------------------------------------------
             // Is the database ONLINE
@@ -63,7 +69,7 @@ internal class Program
                 ? "The task of backup the database finsihed successfully!"
                 : $"The task of backup the database failed with following error message : {errorMessage}", ConsoleColor.Cyan);
 
-            ConsoleEx.WriteLine(" ".PadRight(80,'-'), ConsoleColor.Cyan);
+            ConsoleEx.WriteLine(" ".PadRight(80, '-'), ConsoleColor.Cyan);
 
 
 
@@ -75,7 +81,47 @@ internal class Program
                 : $"The task of restore the database failed with following error message : {errorMessage}", ConsoleColor.Cyan);
 
 
-            ConsoleEx.WriteLine(" ".PadRight(80,'-'), ConsoleColor.Cyan);
+            ConsoleEx.WriteLine(" ".PadRight(80, '-'), ConsoleColor.Cyan);
+
+
+
+            //-------------------------------------------------------------
+            // Test Backup WITH Encryption
+            //-------------------------------------------------------------
+
+            var beo = new BackupEncryptionOptions
+            {
+                NoEncryption = false,
+                Algorithm = BackupEncryptionAlgorithm.Aes256,
+                EncryptorType = BackupEncryptorType.ServerCertificate,
+                EncryptorName = _certName
+            };
+            if (DbGeneral.EnsureBackupCertificateExists(cnn, logger, ref errorMessage,
+                    _certName) == false)
+            {
+                if (DbGeneral.CreateBackupCertificate(cnn, logger, _password, _certName, ref errorMessage) == false)
+                {
+                    Console.WriteLine($"Error creating the server certificate : {errorMessage}");
+                }
+            }
+            ConsoleEx.WriteLine(DbGeneral.BackupDatabase(cnn, logger, ref errorMessage, bckEncOpt: beo)
+                ? "The task of backup the database with encryption finsihed successfully!"
+                : $"The task of backup the database with encryption failed with following error message : {errorMessage}", ConsoleColor.Cyan);
+
+            ConsoleEx.WriteLine(" ".PadRight(80, '-'), ConsoleColor.Cyan);
+
+
+            //-------------------------------------------------------------
+            // Test restore
+            //-------------------------------------------------------------
+            ConsoleEx.WriteLine(DbGeneral.RestoreDatabase(cnn, logger, ref errorMessage)
+                ? "The task of restore the database finsihed successfully!"
+                : $"The task of restore the database failed with following error message : {errorMessage}", ConsoleColor.Cyan);
+
+
+            ConsoleEx.WriteLine(" ".PadRight(80, '-'), ConsoleColor.Cyan);
+
+
 
 
 

@@ -1,13 +1,12 @@
 ﻿using System;
+using  System.IO;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using System.Diagnostics;
 using System.Data;
+using System.Data.SqlClient;
 using Converter.Extension;
 using System.Linq;
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable UnusedVariable
-// ReSharper disable UnusedMember.Global
 
 namespace DBHelper
 {
@@ -23,8 +22,178 @@ namespace DBHelper
 
     public static class DbGeneral
     {
-        private const string LastBackup = "LastBackup";
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cnn"></param>
+        /// <param name="logger"></param>
+        /// <param name="errMessage"></param>
+        /// <param name="bckCertificateName"></param>
+        /// <returns></returns>
+        public static bool EnsureBackupCertificateExists(ServerConnection cnn,
+            ILog logger,
+            ref string errMessage,
+            string bckCertificateName)
+        {
+            var certExist = false;
+            try
+            {
+                cnn.Connect();
+                var server = new Server(cnn);
+                // get the reference to the master database
+                var masterDb = server.Databases["master"];
 
+                certExist = masterDb.Certificates[bckCertificateName] != null;
+
+            }
+            catch (Exception ex)
+            {
+
+                if (Debugger.IsAttached)
+                {
+                    Debugger.Break();
+                }
+
+                errMessage = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                    .Select(ex1 => ex1.Message));
+
+                logger?.Log($"Error in EnsureBackupCertificateExists : {errMessage}");
+                logger?.Log(@"..............................................................................................");
+            }
+
+            return certExist;
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cnn"></param>
+        /// <param name="logger"></param>
+        /// <param name="errMessage"></param>
+        /// <returns></returns>
+        public static bool EnsureMasterKeyExists(ServerConnection cnn,
+            ILog logger,
+            ref string errMessage)
+
+        {
+            var mkExists = false;
+            try
+            {
+                cnn.Connect();
+                var server = new Server(cnn);
+                // get the reference to the master database
+                var masterDb = server.Databases["master"];
+
+                mkExists = masterDb.MasterKey != null;
+
+            }
+            catch (Exception ex)
+            {
+
+                if (Debugger.IsAttached)
+                {
+                    Debugger.Break();
+                }
+
+                errMessage = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                    .Select(ex1 => ex1.Message));
+
+                logger?.Log($"Error in EnsureMasterKeyExists : {errMessage}");
+                logger?.Log(@"..............................................................................................");
+            }
+
+            return mkExists;
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cnn"></param>
+        /// <param name="logger"></param>
+        /// <param name="passwordForMasterKey"></param>
+        /// <param name="backupCertificateName"></param>
+        /// <param name="errMessage"></param>
+        /// <param name="backupKeys"></param>
+        /// <param name="privateKeyFile"></param>
+        /// <param name="certfile"></param>
+        /// <returns></returns>
+        public static bool CreateBackupCertificate(ServerConnection cnn,
+            ILog logger,
+            string passwordForMasterKey,
+            string backupCertificateName,
+            ref string errMessage,
+            bool backupKeys = true,
+            string privateKeyFile = @"C:\TMP\SQLPrivateKeyFile",
+            string certfile = @"C:\TMP\TestSQLServerCert")
+
+        {
+            var retValue = true;
+            try
+            {
+                cnn.Connect();
+                var server = new Server(cnn);
+                // get the reference to the master database
+                var masterDb = server.Databases["master"];
+
+                // Drop certificate and master key
+                masterDb.Certificates[backupCertificateName]?.Drop();
+                //
+                masterDb.MasterKey?.Drop();
+
+                //Create the master key
+                var mk = new MasterKey { Parent = masterDb };
+                mk.Create(passwordForMasterKey);
+                mk.Open(passwordForMasterKey);
+
+                //Creating certificate 
+                var certificate = new Certificate(masterDb, backupCertificateName)
+                {
+                    StartDate = DateTime.Today,
+                    Subject = "Backup certificate",
+                    ExpirationDate = new DateTime(2100,12,31)
+                     
+                };
+                certificate.Create();
+                if ( backupKeys)
+                {
+                    if (File.Exists(certfile))
+                        File.Delete(certfile);
+                    if (File.Exists(privateKeyFile))
+                        File.Delete(privateKeyFile);
+
+                    //Create a backup of the server certificate in the master database.  
+                    certificate.Export(certfile, privateKeyFile, passwordForMasterKey);
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+
+                if (Debugger.IsAttached)
+                {
+                    Debugger.Break();
+                }
+
+                retValue = false;
+                errMessage = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
+                    .Select(ex1 => ex1.Message));
+
+                logger?.Log($"Error in CreateBackupCertificate : {errMessage}");
+                logger?.Log(@"..............................................................................................");
+            }
+
+            return retValue;
+
+        }
+
+
+
+
+        private const string LastBackup = "LastBackup";
+        private const string CServer2012 = "11.0.2100.60";
         #region  Backup rutine 
 
         /// <summary>
@@ -37,32 +206,30 @@ namespace DBHelper
         /// <param name="errMessage"></param>
         /// <param name="doVerify"></param>
         /// <param name="useCompression"></param>
+        /// <param name="bckEncOpt"></param>
         /// <returns></returns>
-        public static bool BackupDatabase(ServerConnection cnn, 
-                                            ILog logger,  
-                                            ref string errMessage, 
+        public static bool BackupDatabase(ServerConnection cnn,
+                                            ILog logger,
+                                            ref string errMessage,
                                             bool doVerify = true, 
-                                            bool useCompression = true)
+                                            bool useCompression = true,
+                                            BackupEncryptionOptions bckEncOpt = null)
         {
             var retValue = false;
             var isLogging = logger != null;
 
-            Server server = null;
-            Backup source = null;
-            BackupDeviceItem destination = null;
-            Restore restore = null;
+            Server server;
+            Backup source;
+            BackupDeviceItem destination;
+            Restore restore;
             var dataBaseName = cnn.DatabaseName;
-            var errMesage = string.Empty;
             try
             {
                 cnn.Connect();
 
                 server = new Server(cnn);
-                string backupFileName = server.BackupDirectory + 
-                    (server.BackupDirectory.EndsWith("") ? @"\" : string.Empty) 
-                    + "dbHelper_" 
-                    + dataBaseName 
-                    + "_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss.bak");
+                string backupFileName =
+                    $"{server.BackupDirectory}{(server.BackupDirectory.EndsWith("") ? @"\" : string.Empty)}dbHelper_{dataBaseName}_{DateTime.Now:yyyyMMdd_HH_mm_ss.bak}";
 
                 if ( isLogging)
                 { 
@@ -74,6 +241,7 @@ namespace DBHelper
                 // Depends on SQL Server Edition
                 var canIUseCompression = server.EngineEdition == Edition.EnterpriseOrDeveloper ||
                                          server.EngineEdition == Edition.Standard;
+
 
                 // instantaniate backup 
                 source = new Backup
@@ -97,6 +265,22 @@ namespace DBHelper
 
                 if (useCompression && canIUseCompression)
                     source.CompressionOption = BackupCompressionOptions.On;
+
+                var errorMessage = "";
+                // Only for SQL Server 2012+ and Edition diffrent from Express
+                var canIUseEncryption = server.EngineEdition != Edition.Express &&
+                                        server.Version >= new Version(CServer2012) && bckEncOpt != null &&
+                                        bckEncOpt.NoEncryption == false &&
+                                        EnsureBackupCertificateExists(cnn, logger, ref errorMessage, bckEncOpt.EncryptorName);
+                if (errorMessage != string.Empty)
+                        logger?.Log(
+                            $"Can not use Encryption because the server certificate does not exists. Additional info : {errorMessage}");
+
+
+                if (canIUseEncryption)
+                {
+                    source.EncryptionOption = bckEncOpt;
+                }
 
 
 
@@ -234,7 +418,7 @@ namespace DBHelper
 
             var retValue = true;
             var isLogging = logger != null;
-            Server server = null;
+            Server server;
             errMessage = string.Empty;
             try
             {
@@ -305,12 +489,12 @@ namespace DBHelper
                                            ILog logger,
                                            ref string errorMessage)
         {
-            bool retValue = true;
-            Server server = null;
-            bool isLogging = logger != null;
-            DatabaseUserAccess dbMode = mode;
+            var retValue = true;
+            Server server;
+            var isLogging = logger != null;
+            var dbMode = mode;
             var dataBaseName = cnn.DatabaseName;
-            Database db = null;
+            Database db;
             try
             {
                 server = new Server(cnn);
@@ -442,8 +626,8 @@ namespace DBHelper
         /// <returns></returns>
         public static double DetermineLogSize(ServerConnection cnn, ref string errorLog)
         {
-            Server server = null;
-            Database db = null;
+            Server server;
+            Database db;
             double retValue = 0;
             var databaseName = cnn.DatabaseName;
             try
@@ -499,11 +683,11 @@ namespace DBHelper
                                             )
         {
 
-            bool retValue = true;
-            Server server = null;
-            bool isLogging = logger != null;
-            Database db = null;
-            string dataBaseName = cnn.DatabaseName;
+            var retValue = true;
+            Server server;
+            var isLogging = logger != null;
+            Database db;
+            var dataBaseName = cnn.DatabaseName;
             try
             {
                 cnn.Connect();
@@ -589,12 +773,12 @@ namespace DBHelper
         /// <returns></returns>
         public static bool RestoreDatabase(ServerConnection cnn, ILog logger, ref string errMessage)
         {
-            bool retValue = false;
-            Server server = null;
-            Restore destination = null;
-            BackupDeviceItem source = null;
-            bool isLogging = logger != null;
-            Database db1 = null;
+            var retValue = false;
+            Server server;
+            Restore destination;
+            BackupDeviceItem source;
+            var isLogging = logger != null;
+            Database db1;
             string dataBaseName = cnn.DatabaseName;
             try
             {
@@ -746,8 +930,8 @@ namespace DBHelper
         {
             var retValue = true;
             var isLogging = logger != null;
-            Server server = null;
-            Database db = null;
+            Server server;
+            Database db;
             var dataBaseName = cnn.DatabaseName;
             try
             {
@@ -839,9 +1023,9 @@ namespace DBHelper
         {
 
             var retValue = true;
-            Server server = null;
+            Server server;
             var isLogging = logger != null;
-            Database db = null;
+            Database db;
             var changeMode = false;
             var dataBaseName = cnn.DatabaseName;
             errorMessage = string.Empty;
@@ -1007,8 +1191,8 @@ namespace DBHelper
         public static bool IsThereAnyBackupTaken(ServerConnection cnn, ILog logger,  ref string errorLog)
         {
             var result = true;
-            Server server = null;
-            Database db = null;
+            Server server;
+            Database db;
             try
             {
                 cnn.Connect();
@@ -1061,9 +1245,9 @@ namespace DBHelper
 
         public static bool CanIPerformABackup(ServerConnection cnn, ILog logger, ref string errMessage)
         {
-            var retValue = true;
-            Database db = null;
-            Server server = null;
+            bool retValue;
+            Database db;
+            Server server;
             var isLogging = logger != null;
             errMessage = string.Empty;
             try
@@ -1153,11 +1337,11 @@ namespace DBHelper
 
         public static bool DeleteBackupFiles(ServerConnection cnn, ILog logger, ref string errMessage)
         {
-            bool retValue = true;
-            Database db = null;
-            Server server = null;
+            var retValue = true;
+            Database db;
+            Server server;
             errMessage = string.Empty;
-            bool isLogging = logger != null;
+            var isLogging = logger != null;
             try
             {
                 if (isLogging)
@@ -1255,10 +1439,10 @@ namespace DBHelper
                                     ref string errorMessage)
         {
             var backupExists = true;
-            Database db = null;
-            Server server = null;
-            bool checkIfExist = false;
-            bool isLogging = logger != null;
+            Database db;
+            Server server;
+            var checkIfExist = false;
+            var isLogging = logger != null;
             numberOfFiles = 0;
             totalSizeInBytes = 0;
             errorMessage = string.Empty;

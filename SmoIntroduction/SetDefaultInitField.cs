@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Data;
 using System.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
@@ -15,10 +16,13 @@ namespace SmoIntroduction
 
             ServerConnection cnn;
 
-
+            var ds = new DataSet();
             using (var sqlConnection = new SqlConnection(connectionString))
             {
                 cnn = new ServerConnection(sqlConnection);
+
+                var custAdapter = new SqlDataAdapter(" SELECT * FROM DC.GetIntermediateResults;", sqlConnection);
+                custAdapter.Fill(ds);
             }
 
 
