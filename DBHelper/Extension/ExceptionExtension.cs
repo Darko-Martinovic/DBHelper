@@ -5,8 +5,8 @@ namespace Converter.Extension
 {
     /// <summary>
     /// When working with SMO, when an exception arises, 
-    /// usually the most inner one contains information that you need. 
-    /// In order to collect all exception text, you have to travel through exception hierarchy.
+    /// usually, the most inner one contains the information that you need. 
+    /// In order to collect all exception text, you have to travel through the exception hierarchy.
     /// </summary>
     public static class ExceptionExtensionMethods
     {
