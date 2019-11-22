@@ -174,7 +174,7 @@ internal class Program
             ////-------------------------------------------------------------
             //// Determine free disk space
             ////-------------------------------------------------------------
-            ConsoleEx.WriteLine(DbGeneral.CanIPerformABackup(cnn, logger, ref errorMessage)
+            ConsoleEx.WriteLine(DbGeneral.CanIPerformABackup(cnn, logger, ref errorMessage, DbGeneral.DiskSizeUnit.GigaBytes)
                 ? "The task of determining free disk space finished successfully!"
                 : $"The task of determining free disk space failed with following error message :{errorMessage}", ConsoleColor.Cyan);
 
