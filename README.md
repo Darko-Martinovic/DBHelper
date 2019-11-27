@@ -43,6 +43,7 @@ CreateGraph                       | Shows how to create NODE & EDGE tables
 CreateMOTable                     | Shows how to create the memory optimized tables
 CreatePartitionScheme             | Shows how to create the partition scheme and the partition function
 CreateStoredProc                  | Shows how to create the stored procedure
+CreateSysVerTempTables            | Shows how to create system-versioned ( temporal ) tables
 CreateTable                       | Shows how to create traditional - disk based tables
 ExtProperties                     | Shows how to manipulate with extended properties
 ExtendedEvents                    | Shows how to manipulate with extended events ( create session, add targets, add events )
