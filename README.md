@@ -25,7 +25,7 @@ SQLCLR project which has, as a result, a DLL that should be published on the dat
 
 Method description                 | Method signature
 ---------------------------------- |--------------------------------------------------------------------------------------------
-Can I perform backup?              | CanIPerformABackup(ServerConnection, ILog , ref string )
+Can I perform backup?              | CanIPerformABackup(ServerConnection, ILog , ref string, DiskSizeUnit )
 To delete old backup files         | DeleteBackupFiles(ServerConnection, ILog, ref string)
 To determine number and size       | DetermineNumberOfBackupFiles(ServerConnection, ILog, ref int, ref Int64,ref string)
 
