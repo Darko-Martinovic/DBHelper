@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>SmoIntroduction</RootNamespace>
     <AssemblyName>SmoIntroduction</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <SccProjectName>
@@ -21,6 +21,7 @@
     </SccProvider>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -147,6 +148,7 @@
     <Compile Include="CreateMOTable.cs" />
     <Compile Include="CreatePartitionScheme.cs" />
     <Compile Include="CreateStoredProc.cs" />
+    <Compile Include="CreateSysTempTables.cs" />
     <Compile Include="ListAllUserDefinedDataTypes.cs" />
     <Compile Include="CreateTable.cs" />
     <Compile Include="ExtendedEvents.cs" />
