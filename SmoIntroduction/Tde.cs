@@ -1,170 +1,120 @@
-﻿using System;
-using System.IO;
-using System.Configuration;
-using System.Data.SqlClient;
-using System.Linq;
-using Converter.Extension;
+﻿using DBHelper;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
-using static Microsoft.SqlServer.Management.Smo.Edition;
 
-namespace SmoIntroduction
+namespace SmoIntroduction;
+
+// based on Microsoft https://learn.microsoft.com/en-us/sql/relational-databases/security/encryption/move-a-tde-protected-database-to-another-sql-server
+public sealed class Tde : IExample
 {
+    public const string DbName = "CustRecords";
+    public const string CertName = "TdeCertificate";
 
-    // based on Microsoft https://docs.microsoft.com/en-us/sql/relational-databases/security/encryption/move-a-tde-protected-database-to-another-sql-server?view=sql-server-2017
+    public string Description => "Shows how to encrypt the database";
 
-    class Tde
+    public void Run(ExampleContext context)
     {
-        private static Server _server;
+        var cnn = context.Connect();
 
-        private static string _dbName = "CustRecords";
-
-        private static string _certName = @"TestSQLServerCert";
-        private static string _password = @"*rt@40(FL&dasl1";
-
-        private static string _privateKeyFile = @"C:\TMP\SQLPrivateKeyFile";
-        private static string _certfile = @"C:\TMP\TestSQLServerCert";
-
-        static void Main()
+        cnn.Connect();
+        Console.WriteLine("Connected");
+        try
         {
-
-            var connectionString = ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString;
-            ServerConnection cnn;
-            using (var sqlConnection = new SqlConnection(connectionString))
-            {
-                cnn = new ServerConnection(sqlConnection);
-            }
-
-            cnn.Connect();
-
-            Console.WriteLine("Connected");
-            _server = new Server(cnn);
+            var server = new Server(cnn);
             Console.WriteLine("Create the server object");
-            if (_server.EngineEdition == Express)
+            if (server.EngineEdition == Edition.Express)
             {
-                Console.WriteLine($"Not available on {_server.Edition}");
-                Console.ReadLine();
+                Console.WriteLine($"Not available on {server.Edition}");
                 return;
-
             }
 
             // Drop the database if exists
-            if (_server.Databases[_dbName] != null)
-                _server.Databases[_dbName].Drop();
-            
+            server.Databases[DbName]?.Drop();
+
             //Create the database
-            var db = new Database(_server, _dbName);
+            var db = new Database(server, DbName);
             db.Create();
 
             // get the reference to the master database
-            var masterDb = _server.Databases["master"];
+            var masterDb = server.Databases["master"];
 
-            // Drop certificate and master key
-            masterDb.Certificates[_certName]?.Drop();
-            //
-            masterDb.MasterKey?.Drop();
-
-            //Create the master key
-            var mk = new MasterKey {Parent = masterDb};
-            mk.Create(_password);
-            mk.Open(_password);
-
-            //Creating certificate 
-            var certificate = new Certificate(masterDb, _certName)
+            // The master key and the certificate protect every database encrypted with them:
+            // create them when they are missing, never drop them
+            if (masterDb.MasterKey == null)
             {
-                StartDate = DateTime.Today,
-                Subject = "Certificate to protect TDE key"
+                Console.WriteLine("Create the master key");
+                var mk = new MasterKey { Parent = masterDb };
+                mk.Create(context.RequireKeyPassword());
+            }
+
+            if (masterDb.Certificates[CertName] == null)
+            {
+                //Creating certificate
+                Console.WriteLine($"Create the certificate {CertName}");
+                var certificate = new Certificate(masterDb, CertName)
+                {
+                    StartDate = DateTime.Today,
+                    Subject = "Certificate to protect TDE key"
+                };
+                certificate.Create();
+
+                // Without a backup of the certificate, the database can't be restored on another server
+                var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                var certificateFile = ServerPaths.Combine(server, server.BackupDirectory, $"{CertName}_{stamp}.cer");
+                var privateKeyFile = ServerPaths.Combine(server, server.BackupDirectory, $"{CertName}_{stamp}.pvk");
+                certificate.Export(certificateFile, privateKeyFile, context.RequireKeyPassword());
+                ConsoleEx.WriteLine($"The certificate is backed up to {certificateFile} and its private key to {privateKeyFile}, on the server",
+                    ConsoleColor.Yellow);
+            }
+
+            //Create Database Encryption
+            var dbEk = new DatabaseEncryptionKey
+            {
+                Parent = db,
+                EncryptionAlgorithm = DatabaseEncryptionAlgorithm.Aes256,
+                EncryptionType = DatabaseEncryptionType.ServerCertificate,
+                EncryptorName = CertName
             };
-            certificate.Create();
 
-            if (File.Exists(_certfile))
-                File.Delete(_certfile);
-            if (File.Exists(_privateKeyFile))
-                File.Delete(_privateKeyFile);
-
-            //Create a backup of the server certificate in the master database.  
-            certificate.Export(_certfile, _privateKeyFile, _password);
-
-            try
+            // Just show in console the database encryption key status
+            var so = new ScriptingOptions
             {
-                //Create Database Encryption 
-                var dbEk = new DatabaseEncryptionKey
-                {
-                    Parent = db,
-                    EncryptionAlgorithm = DatabaseEncryptionAlgorithm.Aes256,
-                    EncryptionType = DatabaseEncryptionType.ServerCertificate,
-                    EncryptorName = _certName
-                };
+                IncludeHeaders = true,
+                IncludeIfNotExists = true
+            };
 
-                // Just show in console the database encryption key status
-                var so = new ScriptingOptions
-                {
-                    IncludeHeaders = true,
-                    IncludeIfNotExists = true
-                };
-                var sc = dbEk.Script(so);
+            Console.WriteLine(new string('-', 79));
+            Console.WriteLine("T-SQL for create");
+            ConsoleEx.WriteScript(dbEk.Script(so).Cast<string>());
 
+            dbEk.Create();
 
-                Console.WriteLine(new string('-', 79));
-                Console.WriteLine("T-SQL for create");
-                Console.WriteLine(new string('-', 79));
-                foreach (var s in sc)
-                {
-                    Console.WriteLine(s);
-                }
+            // Show another feature. How to capture t-sql
+            server.ConnectionContext.SqlExecutionModes = SqlExecutionModes.ExecuteAndCaptureSql;
 
-                dbEk.Create();
+            // Change the database compatibility mode
+            db.CompatibilityLevel = CompatibilityLevel.Version140;
+            db.Alter();
 
+            // Reproduce T-SQL in Console
+            Console.WriteLine(new string('-', 79));
+            Console.WriteLine("T-SQL for Alter");
+            ConsoleEx.WriteScript(server.ConnectionContext.CapturedSql.Text.Cast<string>());
 
-                // Show another feature. How to capture t-sql 
-                _server.ConnectionContext.SqlExecutionModes = SqlExecutionModes.ExecuteAndCaptureSql;
+            // Clearing the already stored TSQL
+            server.ConnectionContext.CapturedSql.Clear();
 
-                // Change the database compatibility mode
-                db.CompatibilityLevel = CompatibilityLevel.Version120;
-                db.Alter();
+            // Changing the execution mode back to normal
+            server.ConnectionContext.SqlExecutionModes = SqlExecutionModes.ExecuteSql;
 
-
-                // Reproducte T-SQL in Console
-                Console.WriteLine(new string('-', 79));
-                Console.WriteLine("T-SQL for Alter");
-                Console.WriteLine(new string('-', 79));
-                foreach (var s in _server.ConnectionContext.CapturedSql.Text)
-                {
-                    Console.WriteLine(s);
-                }
-
-                // Clearing the already stored TSQL
-                _server.ConnectionContext.CapturedSql.Clear();
-
-                // Changing the execution mode back to normal
-                _server.ConnectionContext.SqlExecutionModes = SqlExecutionModes.ExecuteSql;
-
-                db.EncryptionEnabled = true;
-                db.Alter();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
-                    .Select(ex1 => ex1.Message)));
-                Console.ReadLine();
-            }
-            finally
-            {
-                //db.Drop();
-                //masterDb.Certificates[_certName].Drop();
-
-            }
+            db.EncryptionEnabled = true;
+            db.Alter();
+            ConsoleEx.WriteLine($"The database {DbName} is encrypted", ConsoleColor.Cyan);
+        }
+        finally
+        {
             if (cnn.IsOpen)
                 cnn.Disconnect();
-            cnn = null;
-            db = null;
-            _server = null;
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadLine();
-
-
-
         }
     }
-
 }

@@ -1,37 +1,20 @@
-﻿using Microsoft.SqlServer.Management.Common;
-using Microsoft.SqlServer.Management.Smo;
-using System;
-using System.Configuration;
-using System.Data.SqlClient;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
+﻿using Microsoft.SqlServer.Management.Smo;
 
-namespace SmoIntroduction
+namespace SmoIntroduction;
+
+public sealed class ListAllUserDefinedDataTypes : IExample
 {
+    public string Description => "Shows how to get and recreate all user-defined data type in a database";
 
-
-    internal static class ListAllUserDefinedDataTypes
+    public void Run(ExampleContext context)
     {
+        var cnn = context.Connect();
+        var databaseName = context.DatabaseName;
 
-        static void Main()
+        cnn.Connect();
+        ConsoleEx.WriteLine("Connected", ConsoleColor.Blue);
+        try
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString;
-
-            ServerConnection cnn;
-            string databaseName;
-
-            using (var sqlConnection = new SqlConnection(connectionString))
-            {
-                cnn = new ServerConnection(sqlConnection);
-
-                // Read the database name from app.config
-                databaseName = sqlConnection.Database;
-            }
-
-
-            cnn.Connect();
-            ConsoleEx.WriteLine("Connected", ConsoleColor.Blue);
             //Create the server object
             var server = new Server(cnn);
             ConsoleEx.WriteLine("Create the server object", ConsoleColor.Cyan);
@@ -41,92 +24,49 @@ namespace SmoIntroduction
             ConsoleEx.WriteLine($"List of all user defined data type in the database {db.Name}", ConsoleColor.Cyan);
             ConsoleEx.WriteLine("--------------------------------------------------------------------------", ConsoleColor.Yellow);
 
-
-            // get all user defined data types 
-            var userDt = db.UserDefinedDataTypes;
-
-            var result = new StringBuilder();
-            foreach (UserDefinedDataType t in userDt)
+            // get all user defined data types
+            var script = new List<string>();
+            foreach (UserDefinedDataType t in db.UserDefinedDataTypes)
             {
-                ConsoleEx.WriteLine($"{t.Schema}{'.'}{t.Name}", ConsoleColor.Red);
-                var helper = t.Script(MakeOptions());
-                foreach (var h in helper)
-                {
-                    result.AppendLine(h);    
-                }
-                result.AppendLine();
+                ConsoleEx.WriteLine($"{t.Schema}.{t.Name}", ConsoleColor.Red);
+                script.AddRange(t.Script(MakeOptions()).Cast<string>());
+                script.Add("");
             }
 
-            var fileName = $"{db.Name}_UDDT_{DateTime.Now:yyyy_mm_dd_HH_mm_ss}.txt";
-            if (File.Exists(fileName))
-                File.Delete(fileName);
-            File.WriteAllText(fileName, result.ToString());
-            // start notepad and disply the configuration
-            Process.Start(fileName);
-
-
+            ConsoleEx.WriteScript(script);
+        }
+        finally
+        {
             if (cnn.IsOpen)
                 cnn.Disconnect();
-            cnn = null;
-            db = null;
-            server = null;
-
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadLine();
         }
-
-
-
-        public static ScriptingOptions MakeOptions()
-        {
-            ScriptingOptions o = null;
-            try
-            {
-                o = new ScriptingOptions
-                {
-                    AllowSystemObjects = false,
-                    AnsiFile = true,
-                    AppendToFile = false,
-                    AnsiPadding = true,
-
-
-
-
-                    ExtendedProperties = true,
-                    EnforceScriptingOptions = true,
-
-                    IncludeIfNotExists = true,
-                    IncludeHeaders = true,
-                    IncludeDatabaseContext = false,
-
-
-
-                    NoCommandTerminator = false,
-                    Permissions = true,
-                    SchemaQualify = true,
-                    SchemaQualifyForeignKeysReferences = true,
-
-                    NoCollation = false,
-                    NoExecuteAs = true,
-                    
-
-                    ScriptBatchTerminator = true,
-
-
-                    WithDependencies = true
-                };
-
-
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.ReadLine();
-            }
-            return o;
-        }
-
-
     }
+
+    public static ScriptingOptions MakeOptions() =>
+        new()
+        {
+            AllowSystemObjects = false,
+            AnsiFile = true,
+            AppendToFile = false,
+            AnsiPadding = true,
+
+            ExtendedProperties = true,
+            EnforceScriptingOptions = true,
+
+            IncludeIfNotExists = true,
+            IncludeHeaders = true,
+            IncludeDatabaseContext = false,
+
+            NoCommandTerminator = false,
+            Permissions = true,
+            SchemaQualify = true,
+            SchemaQualifyForeignKeysReferences = true,
+
+            NoCollation = false,
+            NoExecuteAs = true,
+
+            ScriptBatchTerminator = true,
+
+            WithDependencies = true
+        };
 }
