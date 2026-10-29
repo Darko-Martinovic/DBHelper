@@ -1,0 +1,18 @@
+# SQL Server for the examples, on port 1433 unless MSSQL_PORT says otherwise.
+#   MSSQL_SA_PASSWORD='<a strong password>' docker compose up -d    (or: podman compose up -d)
+# The AdventureWorks backup in .adventureworks is mounted at /var/opt/mssql/backup (see README.md).
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD to a strong password}
+    ports:
+      # Only this machine
+      - "127.0.0.1:${MSSQL_PORT:-1433}:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+      - ./.adventureworks:/var/opt/mssql/backup:ro
+
+volumes:
+  sqlserver-data:
