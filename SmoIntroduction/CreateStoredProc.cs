@@ -1,37 +1,23 @@
-﻿using Converter.Extension;
-using Microsoft.SqlServer.Management.Common;
-using Microsoft.SqlServer.Management.Smo;
-using System;
-using System.Configuration;
-using System.Data.SqlClient;
-using System.Diagnostics;
-using System.Linq;
-using System.IO;
+﻿using Microsoft.SqlServer.Management.Smo;
 
-namespace SmoIntroduction
+namespace SmoIntroduction;
+
+public sealed class CreateStoredProc : IExample
 {
-    internal static class CreateStoredProc
+    public const string SchemaName = "dbo";
+    public const string StoredProcedureName = "SmoTest";
+
+    public string Description => "Shows how to create the stored procedure";
+
+    public void Run(ExampleContext context)
     {
-        private const string SchemaName = "DBO";
-        private const string StoredProcedureName = "SmoTest";
+        var cnn = context.Connect();
+        var databaseName = context.DatabaseName;
 
-        private const string CTmpStoredprocedureSql = @"C:\TMP\StoredProcedure.SQL";
-
-        public static void Main()
+        cnn.Connect();
+        Console.WriteLine("Connected");
+        try
         {
-
-            var connectionString = ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString;
-            ServerConnection cnn;
-            string databaseName;
-
-            using (var sqlConnection = new SqlConnection(connectionString))
-            {
-                cnn = new ServerConnection(sqlConnection);
-                // Read the database name from app.config
-                databaseName = sqlConnection.Database;
-            }
-            cnn.Connect();
-            Console.WriteLine("Connected");
             var server = new Server(cnn);
             Console.WriteLine("Create the server object");
             var database = server.Databases[databaseName];
@@ -39,12 +25,12 @@ namespace SmoIntroduction
             if (database.StoredProcedures.Contains(StoredProcedureName, SchemaName))
             {
                 // Removes the stored procedure from the instance of SQL Server.
-                // To drop a stored procedure, users must have CONTROL permission on the stored procedure or be a member of the db_owner fixed database role. 
+                // To drop a stored procedure, users must have CONTROL permission on the stored procedure or be a member of the db_owner fixed database role.
                 database.StoredProcedures[StoredProcedureName, SchemaName].Drop();
             }
 
             // To create a stored procedure, users must have CREATE PROCEDURE permission on the parent database
-            // or be a member of the db_owner fixed database role. 
+            // or be a member of the db_owner fixed database role.
             var newsp = new StoredProcedure(database, StoredProcedureName, SchemaName)
             {
                 // TextMode the text header is not editable
@@ -55,40 +41,21 @@ namespace SmoIntroduction
 
                 //  the stored procedure is encrypted
                 IsEncrypted = true
-
             };
-            // Parameter 
+            // Parameter
             var parm = new StoredProcedureParameter(newsp, "@param") { DataType = DataType.SysName };
             newsp.Parameters.Add(parm);
 
+            newsp.Create();
+            Console.WriteLine("Successfully created the stored procedure ");
 
-            try
-            {
-                newsp.Create();
-                Console.WriteLine("Successfully created the stored procedure ");
-
-                //Script the stored procedure 
-                var result = newsp.Script();
-
-                // Write scripting output to sql file
-                File.WriteAllLines(CTmpStoredprocedureSql, result.Cast<string>());
-
-                // Start NOTEPAD and display T-SQL script
-                Process.Start("notepad", CTmpStoredprocedureSql);
-
-
-            }
-            catch (Exception ex)
-            {
-
-                var error = string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
-                    .Select(ex1 => ex1.Message));
-
-                Console.WriteLine("An error occured while creating the stored procedure. The error message is : " + error);
-
-            }
-            Console.ReadLine();
-
+            //Script the stored procedure
+            ConsoleEx.WriteScript(newsp.Script().Cast<string>());
+        }
+        finally
+        {
+            if (cnn.IsOpen)
+                cnn.Disconnect();
         }
     }
 }

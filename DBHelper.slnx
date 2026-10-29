@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/tests/">
+    <Project Path="tests/DBHelper.Tests/DBHelper.Tests.csproj" />
+  </Folder>
+  <Project Path="DBHelper/DBHelper.csproj" />
+  <Project Path="SmoIntroduction/SmoIntroduction.csproj" />
+</Solution>

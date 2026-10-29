@@ -1,338 +1,96 @@
-﻿using System;
-using System.Configuration;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Runtime.InteropServices;
-using Converter.Extension;
+﻿using DBHelper;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 
-namespace SmoIntroduction
-{
-    class ServerEvents
-    {
-        private static Server _server;
-        static void Main()
-        {
+namespace SmoIntroduction;
 
-            var connectionString = ConfigurationManager.ConnectionStrings["ConnStr"].ConnectionString;
-            ServerConnection cnn;
-            using (var sqlConnection = new SqlConnection(connectionString))
+/// <summary>
+/// SMO receives server events through WMI, so this example needs Windows on both sides:
+/// the client and a SQL Server on Windows, whose WMI the client can reach.
+/// </summary>
+public sealed class ServerEvents : IExample
+{
+    public string Description => "Shows how to subscribe to server events (Windows only)";
+
+    public void Run(ExampleContext context)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            ConsoleEx.WriteLine("SMO receives server events through WMI, which only Windows has.", ConsoleColor.Yellow);
+            return;
+        }
+
+        var cnn = context.Connect();
+
+        cnn.Connect();
+        Console.WriteLine("Connected");
+        var server = new Server(cnn);
+        Console.WriteLine("Create the server object");
+        try
+        {
+            if (server.HostPlatform != HostPlatformNames.Windows)
             {
-                cnn = new ServerConnection(sqlConnection);
+                ConsoleEx.WriteLine($"SMO receives server events through WMI, and {server.Name} runs on {server.HostPlatform}.", ConsoleColor.Yellow);
+                return;
             }
 
-            cnn.Connect();
+            server.Events.ServerEvent += Events_ServerEvent;
 
-            Console.WriteLine("Connected");
-            _server = new Server(cnn);
-            Console.WriteLine("Create the server object");
-
-
-            _server.Events.ServerEvent += Events_ServerEvent;
-            SetConsoleCtrlHandler(ConsoleCtrlCheck, true);
-
-
-
-            // see complete events list below 
-            //---------------------------------------------------------------------    
-            //      internal enum ServerEventValues
-            //{
-            //    AddRoleMember,
-            //    AddServerRoleMember,
-            //    AddSignature,
-            //    AddSignatureSchemaObject,
-            //    AlterApplicationRole,
-            //    AlterAssembly,
-            //    AlterAsymmetricKey,
-            //    AlterAudit,
-            //    AlterAuthorizationDatabase,
-            //    AlterAuthorizationServer,
-            //    AlterAvailabilityGroup,
-            //    AlterBrokerPriority,
-            //    AlterCertificate,
-            //    AlterColumnEncryptionKey,
-            //    AlterCredential,
-            //    AlterCryptographicProvider,
-            //    AlterDatabase,
-            //    AlterDatabaseAuditSpecification,
-            //    AlterDatabaseEncryptionKey,
-            //    AlterEndpoint,
-            //    AlterEventSession,
-            //    AlterExtendedProperty,
-            //    AlterFulltextCatalog,
-            //    AlterFulltextIndex,
-            //    AlterFulltextStoplist,
-            //    AlterFunction,
-            //    AlterIndex,
-            //    AlterInstance,
-            //    AlterLinkedServer,
-            //    AlterLogin,
-            //    AlterMasterKey,
-            //    AlterMessage,
-            //    AlterMessageType,
-            //    AlterPartitionFunction,
-            //    AlterPartitionScheme,
-            //    AlterPlanGuide,
-            //    AlterProcedure,
-            //    AlterQueue,
-            //    AlterRemoteServer,
-            //    AlterRemoteServiceBinding,
-            //    AlterResourceGovernorConfig,
-            //    AlterResourcePool,
-            //    AlterRole,
-            //    AlterRoute,
-            //    AlterSchema,
-            //    AlterSearchPropertyList,
-            //    AlterSecurityPolicy,
-            //    AlterSequence,
-            //    AlterServerAudit,
-            //    AlterServerAuditSpecification,
-            //    AlterServerConfiguration,
-            //    AlterServerRole,
-            //    AlterService,
-            //    AlterServiceMasterKey,
-            //    AlterSymmetricKey,
-            //    AlterTable,
-            //    AlterTrigger,
-            //    AlterUser,
-            //    AlterView,
-            //    AlterWorkloadGroup,
-            //    AlterXmlSchemaCollection,
-            //    BindDefault,
-            //    BindRule,
-            //    CreateApplicationRole,
-            //    CreateAssembly,
-            //    CreateAsymmetricKey,
-            //    CreateAudit,
-            //    CreateAvailabilityGroup,
-            //    CreateBrokerPriority,
-            //    CreateCertificate,
-            //    CreateColumnEncryptionKey,
-            //    CreateColumnMasterKey,
-            //    CreateContract,
-            //    CreateCredential,
-            //    CreateCryptographicProvider,
-            //    CreateDatabase,
-            //    CreateDatabaseAuditSpecification,
-            //    CreateDatabaseEncryptionKey,
-            //    CreateDefault,
-            //    CreateEndpoint,
-            //    CreateEventNotification,
-            //    CreateEventSession,
-            //    CreateExtendedProcedure,
-            //    CreateExtendedProperty,
-            //    CreateFulltextCatalog,
-            //    CreateFulltextIndex,
-            //    CreateFulltextStoplist,
-            //    CreateFunction,
-            //    CreateIndex,
-            //    CreateLinkedServer,
-            //    CreateLinkedServerLogin,
-            //    CreateLogin,
-            //    CreateMasterKey,
-            //    CreateMessage,
-            //    CreateMessageType,
-            //    CreatePartitionFunction,
-            //    CreatePartitionScheme,
-            //    CreatePlanGuide,
-            //    CreateProcedure,
-            //    CreateQueue,
-            //    CreateRemoteServer,
-            //    CreateRemoteServiceBinding,
-            //    CreateResourcePool,
-            //    CreateRole,
-            //    CreateRoute,
-            //    CreateRule,
-            //    CreateSchema,
-            //    CreateSearchPropertyList,
-            //    CreateSecurityPolicy,
-            //    CreateSequence,
-            //    CreateServerAudit,
-            //    CreateServerAuditSpecification,
-            //    CreateServerRole,
-            //    CreateService,
-            //    CreateSpatialIndex,
-            //    CreateStatistics,
-            //    CreateSymmetricKey,
-            //    CreateSynonym,
-            //    CreateTable,
-            //    CreateTrigger,
-            //    CreateType,
-            //    CreateUser,
-            //    CreateView,
-            //    CreateWorkloadGroup,
-            //    CreateXmlIndex,
-            //    CreateXmlSchemaCollection,
-            //    DenyDatabase,
-            //    DenyServer,
-            //    DropApplicationRole,
-            //    DropAssembly,
-            //    DropAsymmetricKey,
-            //    DropAudit,
-            //    DropAvailabilityGroup,
-            //    DropBrokerPriority,
-            //    DropCertificate,
-            //    DropColumnEncryptionKey,
-            //    DropColumnMasterKey,
-            //    DropContract,
-            //    DropCredential,
-            //    DropCryptographicProvider,
-            //    DropDatabase,
-            //    DropDatabaseAuditSpecification,
-            //    DropDatabaseEncryptionKey,
-            //    DropDefault,
-            //    DropEndpoint,
-            //    DropEventNotification,
-            //    DropEventSession,
-            //    DropExtendedProcedure,
-            //    DropExtendedProperty,
-            //    DropFulltextCatalog,
-            //    DropFulltextIndex,
-            //    DropFulltextStoplist,
-            //    DropFunction,
-            //    DropIndex,
-            //    DropLinkedServer,
-            //    DropLinkedServerLogin,
-            //    DropLogin,
-            //    DropMasterKey,
-            //    DropMessage,
-            //    DropMessageType,
-            //    DropPartitionFunction,
-            //    DropPartitionScheme,
-            //    DropProcedure,
-            //    DropQueue,
-            //    DropRemoteServer,
-            //    DropRemoteServiceBinding,
-            //    DropResourcePool,
-            //    DropRole,
-            //    DropRoleMember,
-            //    DropRoute,
-            //    DropRule,
-            //    DropSchema,
-            //    DropSearchPropertyList,
-            //    DropSecurityPolicy,
-            //    DropSequence,
-            //    DropServerAudit,
-            //    DropServerAuditSpecification,
-            //    DropServerRole,
-            //    DropServerRoleMember,
-            //    DropService,
-            //    DropSignature,
-            //    DropSignatureSchemaObject,
-            //    DropStatistics,
-            //    DropSymmetricKey,
-            //    DropSynonym,
-            //    DropTable,
-            //    DropTrigger,
-            //    DropType,
-            //    DropUser,
-            //    DropView,
-            //    DropWorkloadGroup,
-            //    DropXmlSchemaCollection,
-            //    GrantDatabase,
-            //    GrantServer,
-            //    Rename,
-            //    RevokeDatabase,
-            //    RevokeServer,
-            //    UnbindDefault,
-            //    UnbindRule,
-            //    UpdateStatistics,
-            //}
-
-
+            // ServerEvent has a property for each event there is: CreateTable, DropTable, AlterLogin...
             // Subscribe to create & drop table events
-            _server.Events.SubscribeToEvents(ServerEvent.CreateTable + ServerEvent.DropTable);
+            server.Events.SubscribeToEvents(ServerEvent.CreateTable + ServerEvent.DropTable);
 
-            // ctrl + c or ctrl + break to quit
             Console.WriteLine(new string('-', 79));
-            Console.WriteLine($@"Starting events for server: {_server.Name}");
+            Console.WriteLine($@"Starting events for server: {server.Name}");
             Console.WriteLine(new string('-', 79));
             Console.WriteLine($@"Capturing events {ServerEvent.CreateTable} and {ServerEvent.DropTable}");
             Console.WriteLine(new string('-', 79));
-            Console.WriteLine(@"Try creating and droping tables(ctrl+c or ctrl+break to quit)");
+            Console.WriteLine(@"Try creating and droping tables (press any key to stop)");
             Console.WriteLine(new string('-', 79));
 
-
             // Start receiving events
-            _server.Events.StartEvents();
+            server.Events.StartEvents();
 
-            // wait for events 
-            while (!_isclosing)
-            {
-            }
+            // wait for events
+            if (Console.IsInputRedirected)
+                Console.ReadLine();
+            else
+                Console.ReadKey(intercept: true);
         }
-
-        private static bool _isclosing;
-
-
-        private static void Events_ServerEvent(object sender, ServerEventArgs e)
+        finally
         {
-            try
-            {
-                Console.WriteLine(
-                    @"EventType: {0, -20} SPID: {1, 4} PostTime: {2, -20}",
-                    e.EventType, e.Spid, e.PostTime);
+            Console.WriteLine("Exiting - Unsubscribe from all the events");
+            server.Events.UnsubscribeAllEvents();
+            if (cnn.IsOpen)
+                cnn.Disconnect();
+        }
+    }
 
-                foreach (var ep in e.Properties)
+    private static void Events_ServerEvent(object sender, ServerEventArgs e)
+    {
+        try
+        {
+            Console.WriteLine(
+                @"EventType: {0, -20} SPID: {1, 4} PostTime: {2, -20}",
+                e.EventType, e.Spid, e.PostTime);
+
+            foreach (EventProperty ep in e.Properties)
+            {
+                if (ep.Value != null)
                 {
-                    if (ep.Value != null)
-                    {
-                        Console.WriteLine("\t{0, -30} {1, -30}",
-                            ep.Name,
-                            ep.Value);
-                    }
-                    else
-                        Console.WriteLine("\t{0,-30}", ep.Name);
-
+                    Console.WriteLine("\t{0, -30} {1, -30}", ep.Name, ep.Value);
                 }
-                Console.WriteLine();
-                Console.WriteLine(new string('-', 79));
-                Console.WriteLine();
+                else
+                    Console.WriteLine("\t{0,-30}", ep.Name);
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(string.Join(Environment.NewLine + "\t", ex.CollectThemAll(ex1 => ex1.InnerException)
-                    .Select(ex1 => ex1.Message)));
 
-            }
+            Console.WriteLine();
+            Console.WriteLine(new string('-', 79));
+            Console.WriteLine();
         }
-
-        private static bool ConsoleCtrlCheck(CtrlTypes ctrlType)
+        catch (Exception ex)
         {
-
-            switch (ctrlType)
-            {
-                case CtrlTypes.CtrlCEvent:
-                case CtrlTypes.CtrlBreakEvent:
-                case CtrlTypes.CtrlCloseEvent:
-                    Console.WriteLine("Exiting - Unsubscribe from all the events");
-                    _server.Events.UnsubscribeAllEvents();
-                    _isclosing = true;
-                    break;
-
-            }
-            return true;
+            Console.WriteLine(ex.AllMessages());
         }
-
-        #region unmanaged
-        // Declare the SetConsoleCtrlHandler function as external and receiving a delegate. 
-
-        [DllImport("Kernel32")]
-        public static extern bool SetConsoleCtrlHandler(HandlerRoutine handler, bool add);
-
-        // A delegate type to be used as the handler routine for SetConsoleCtrlHandler.
-        public delegate bool HandlerRoutine(CtrlTypes ctrlType);
-
-        // An enumerated type for the control messages sent to the handler routine.
-        public enum CtrlTypes
-        {
-            CtrlCEvent = 0,
-            CtrlBreakEvent,
-            CtrlCloseEvent,
-        }
-
-        #endregion
-
     }
 }
